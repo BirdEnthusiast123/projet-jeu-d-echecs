@@ -1,0 +1,19 @@
+possible moves:
+    captures
+    check:
+        pin
+        castle
+    promotion
+    en passant
+
+detect checkmate
+    king moves
+    block w other piece
+    capture checking piece
+    detect stalemate/draw if no legal move
+
+ia
+
+set player side
+
+advantage indicator
