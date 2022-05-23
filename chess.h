@@ -37,10 +37,16 @@ typedef struct
 
 typedef struct
 {
-    Position from;
-    Position to;
+    Position* from;
+    Position* to;
     Piece piece;
 } Move;
+
+typedef struct
+{
+	int len;
+	Move* move_arr;
+} Move_arr;
 
 typedef struct
 {

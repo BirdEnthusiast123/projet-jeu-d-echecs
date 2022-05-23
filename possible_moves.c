@@ -1,26 +1,40 @@
 #include "chess.h"
 
 
-
-
-
-int main()
+Position* get_position()
 {
-	printf("hey\n");
-
-	Game g;
-
-	init_game_board(&g);
-
-	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0";
-	parse_fen_string(&g, fen);
-	print_game(&g);
-
-	free_game_board(&g);
-
-	return 0;
+	Position* res = (Position*) malloc(sizeof(Position));
+	res->x = rand();
+	res->y = rand();
+	return res;
 }
 
+void free_position(Position* p)
+{
+	free(p);
+}
+
+Move* get_move()
+{
+	Move* res = (Move*) malloc(sizeof(Move));
+	res->piece = rand();
+	return res;
+}
+
+void free_move(Move* m)
+{
+	free_position(m->from);
+	free_position(m->to);
+	free(m);
+}
+
+Move_arr* get_move_arr()
+{
+	Move_arr* res = (Move_arr*) malloc(sizeof(Move_arr));
+	res->move_arr = malloc(2 * sizeof(Move));
+	res->move_arr[0] = *(get_move());
+	res->move_arr[1] = *(get_move());
+}
 
 
 
