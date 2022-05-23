@@ -1,8 +1,8 @@
-EXEC_FILE = possible_moves
-OBJECTS = possible_moves.o
-SOURCES = possible_moves.c
+EXEC_FILE = possible_moves chessboard
+OBJECTS = possible_moves.o chessboard.o
+SOURCES = possible_moves.c chessboard.c
 
-CFLAGS = -c -g -Wall -Wextra -Werror# obligatoires
+CFLAGS = -c -g -Wall -Wextra -Werror
 MEM_DEBUG = -fsanitize=address
 
 .PHONY: all clean
