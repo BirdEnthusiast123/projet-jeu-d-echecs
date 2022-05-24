@@ -1,40 +1,30 @@
 #include "chess.h"
 
-
-Position* get_position()
+typedef struct
 {
-	Position* res = (Position*) malloc(sizeof(Position));
-	res->x = rand();
-	res->y = rand();
+	int len;
+	int* arr;
+} Test;
+
+Test* wrap_possible_moves(int x, int y)
+{
+	
+	Test* res = malloc(sizeof(Test));
+	res->arr = malloc(3 * sizeof(int));
+	res->len = 3;
+	res->arr[0] = 1;
+	res->arr[1] = x;
+	res->arr[2] = y;
+	
 	return res;
 }
 
-void free_position(Position* p)
+void free_test(Test* t)
 {
-	free(p);
+	free(t->arr);
+	free(t);
 }
 
-Move* get_move()
-{
-	Move* res = (Move*) malloc(sizeof(Move));
-	res->piece = rand();
-	return res;
-}
-
-void free_move(Move* m)
-{
-	free_position(m->from);
-	free_position(m->to);
-	free(m);
-}
-
-Move_arr* get_move_arr()
-{
-	Move_arr* res = (Move_arr*) malloc(sizeof(Move_arr));
-	res->move_arr = malloc(2 * sizeof(Move));
-	res->move_arr[0] = *(get_move());
-	res->move_arr[1] = *(get_move());
-}
 
 
 

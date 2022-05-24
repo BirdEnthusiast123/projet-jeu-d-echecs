@@ -3,7 +3,6 @@ OBJECTS = possible_moves.o chessboard.o
 SOURCES = possible_moves.c chessboard.c
 
 CFLAGS = -c -g -Wall -Wextra -Werror
-MEM_DEBUG = -fsanitize=address
 
 .PHONY: all clean
 
@@ -11,16 +10,16 @@ MEM_DEBUG = -fsanitize=address
 all: $(EXEC_FILE)
 
 $(OBJECTS): %.o: %.c
-	$(CC) $< $(CFLAGS) $(MEM_DEBUG)
+	$(CC) -fPIC $< $(CFLAGS)
 
 $(EXEC_FILE): $(OBJECTS)
-	$(CC) $^ -o $@ $(MEM_DEBUG)
+	$(CC) $^ -o $@ 
 
 clean:
 	rm -f $(EXEC_FILE) *.o *.so
 
-lib:
-	gcc -fPIC -shared -o shared.so possible_moves.c
+lib: chessboard.o possible_moves.o 
+	$(CC) -fPIC -shared -o shared.so $(OBJECTS)
 
 deploy:
 	$(CC) -O3 -o $(EXEC_FILE) $(SOURCES)
