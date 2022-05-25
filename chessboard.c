@@ -241,5 +241,5 @@ int is_white(Piece p)
 
 int is_empty(Piece p)
 {
-	return (p | 16);
+	return (p == EMPTY);
 }

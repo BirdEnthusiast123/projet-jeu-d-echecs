@@ -65,28 +65,309 @@ void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml)
 void fill_move_list_black_rook(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black rook in x = %d y = %d\n", x, y);
+
+	// up
+	int tmp = x - 1;
+	while (tmp >= 0)
+	{
+		Piece p = get_piece(g, tmp, y);
+		if (is_empty(p))
+		{
+			add_move(ml, tmp, y);
+			tmp--;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_black == true
+	}
+
+	// down
+	tmp = x + 1;
+	while (tmp <= 7)
+	{
+		Piece p = get_piece(g, tmp, y);
+		if (is_empty(p))
+		{
+			add_move(ml, tmp, y);
+			tmp++;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_black == true
+	}
+
+	// left
+	tmp = y - 1;
+	while (tmp >= 0)
+	{
+		Piece p = get_piece(g, x, tmp);
+		if (is_empty(p))
+		{
+			add_move(ml, x, tmp);
+			tmp--;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, x, tmp);
+			break;
+		}
+		else
+			break; // is_black == true
+	}
+
+	// right
+	tmp = y + 1;
+	while (tmp <= 7)
+	{
+		Piece p = get_piece(g, x, tmp);
+		if (is_empty(p))
+		{
+			add_move(ml, x, tmp);
+			tmp++;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, x, tmp);
+			break;
+		}
+		else
+			break; // is_black == true
+	}
 }
 
 void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black knight in x = %d y = %d\n", x, y);
+
+	int tmp_x = x - 2;
+	int tmp_y;
+	Piece tmp_p;
+
+	// left
+	if (tmp_x >= 0)
+	{
+		tmp_y = y - 1;
+		if (tmp_y >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_y = y + 1;
+		if (tmp_y <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// right
+	tmp_x = x + 2;
+	if (tmp_x <= 7)
+	{
+		tmp_y = y - 1;
+		if (tmp_y >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_y = y + 1;
+		if (tmp_y <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// up
+	tmp_y = y - 2;
+	if (tmp_y >= 0)
+	{
+		tmp_x = x - 1;
+		if (tmp_x >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_x = x + 1;
+		if (tmp_x <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// down
+	tmp_y = y + 2;
+	if (tmp_y <= 7)
+	{
+		tmp_x = x - 1;
+		if (tmp_x >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_x = x + 1;
+		if (tmp_x <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_white(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
 }
 
 void fill_move_list_black_bishop(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black bishop in x = %d y = %d\n", x, y);
+
+	int tmp_x = x + 1, tmp_y = y + 1;
+	Piece p;
+	// Sout east
+	while ((tmp_x <= 7) && (tmp_y <= 7))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x++;
+			tmp_y++;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// South west
+	tmp_x = x - 1;
+	tmp_y = y + 1;
+	while ((tmp_x >= 0) && (tmp_y <= 7))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x--;
+			tmp_y++;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// North east
+	tmp_x = x + 1;
+	tmp_y = y - 1;
+	while ((tmp_x <= 7) && (tmp_y >= 0))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x++;
+			tmp_y--;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// North west
+	tmp_x = x - 1;
+	tmp_y = y - 1;
+	while ((tmp_x >= 0) && (tmp_y >= 0))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x--;
+			tmp_y--;
+		}
+		else if (is_white(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
 }
 
 void fill_move_list_black_queen(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black queen in x = %d y = %d\n", x, y);
+
+	fill_move_list_black_rook(g, x, y, ml);
+
+	fill_move_list_black_bishop(g, x, y, ml);
 }
 
 void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black king in x = %d y = %d\n", x, y);
+
+	int tmp_x, tmp_y;
+	for (int i = -1; i <= 1; i++)
+	{
+		tmp_x = x + i;
+		if ((tmp_x >= 0) && (tmp_x <= 7))
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				tmp_y = y + j;
+				if
+				(
+					(tmp_y >= 0) &&
+					(tmp_y <= 7) &&
+					(
+						is_empty(get_piece(g, tmp_x, tmp_y)) ||
+						is_white(g, tmp_x, tmp_y)
+					)
+				)
+				{
+					add_move(ml, tmp_x, tmp_y);
+				}
+			}
+		}
+	}
 }
 
+// post: check for promotion
 void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 {
 	printf("white pawn in x = %d y = %d\n", x, y);
@@ -119,71 +400,351 @@ void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white rookt in x = %d y = %d\n", x, y);
+	printf("white rook in x = %d y = %d\n", x, y);
+
+	// up
+	int tmp = x - 1;
+	while (tmp >= 0)
+	{
+		Piece p = get_piece(g, tmp, y);
+		if (is_empty(p))
+		{
+			add_move(ml, tmp, y);
+			tmp--;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_white == true
+	}
+
+	// down
+	tmp = x + 1;
+	while (tmp <= 7)
+	{
+		Piece p = get_piece(g, tmp, y);
+		if (is_empty(p))
+		{
+			add_move(ml, tmp, y);
+			tmp++;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_white == true
+	}
+
+	// left
+	tmp = y - 1;
+	while (tmp >= 0)
+	{
+		Piece p = get_piece(g, x, tmp);
+		if (is_empty(p))
+		{
+			add_move(ml, x, tmp);
+			tmp--;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_white == true
+	}
+
+	// right
+	tmp = y + 1;
+	while (tmp <= 7)
+	{
+		Piece p = get_piece(g, x, tmp);
+		if (is_empty(p))
+		{
+			add_move(ml, x, tmp);
+			tmp++;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp, y);
+			break;
+		}
+		else
+			break; // is_white == true
+	}
 }
 
 void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white pawn in x = %d y = %d\n", x, y);
+	printf("white knight in x = %d y = %d\n", x, y);
+
+	int tmp_x = x - 2;
+	int tmp_y;
+	Piece tmp_p;
+
+	// left
+	if (tmp_x >= 0)
+	{
+		tmp_y = y - 1;
+		if (tmp_y >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_y = y + 1;
+		if (tmp_y <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// right
+	tmp_x = x + 2;
+	if (tmp_x <= 7)
+	{
+		tmp_y = y - 1;
+		if (tmp_y >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_y = y + 1;
+		if (tmp_y <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// up
+	tmp_y = y - 2;
+	if (tmp_y >= 0)
+	{
+		tmp_x = x - 1;
+		if (tmp_x >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_x = x + 1;
+		if (tmp_x <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
+
+	// down
+	tmp_y = y + 2;
+	if (tmp_y <= 7)
+	{
+		tmp_x = x - 1;
+		if (tmp_x >= 0)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+
+		tmp_x = x + 1;
+		if (tmp_x <= 7)
+		{
+			tmp_p = get_piece(g, tmp_x, tmp_y);
+			if (is_empty(tmp_p) || is_black(tmp_p))
+				add_move(ml, tmp_x, tmp_y);
+		}
+	}
 }
 
 void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white pawn in x = %d y = %d\n", x, y);
+	printf("white bishop in x = %d y = %d\n", x, y);
+
+	int tmp_x = x + 1, tmp_y = y + 1;
+	Piece p;
+	// Sout east
+	while ((tmp_x <= 7) && (tmp_y <= 7))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x++;
+			tmp_y++;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// South west
+	tmp_x = x - 1;
+	tmp_y = y + 1;
+	while ((tmp_x >= 0) && (tmp_y <= 7))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x--;
+			tmp_y++;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// North east
+	tmp_x = x + 1;
+	tmp_y = y - 1;
+	while ((tmp_x <= 7) && (tmp_y >= 0))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x++;
+			tmp_y--;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
+
+	// North west
+	tmp_x = x - 1;
+	tmp_y = y + 1;
+	while ((tmp_x >= 0) && (tmp_y <= 7))
+	{
+		p = get_piece(g, tmp_x, tmp_y);
+
+		if (is_empty(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			tmp_x--;
+			tmp_y++;
+		}
+		else if (is_black(p))
+		{
+			add_move(ml, tmp_x, tmp_y);
+			break;
+		}
+		else
+			break;
+	}
 }
 
 void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white pawn in x = %d y = %d\n", x, y);
+	printf("white queen in x = %d y = %d\n", x, y);
+
+	fill_move_list_white_rook(g, x, y, ml);
+
+	fill_move_list_white_bishop(g, x, y, ml);
 }
 
 void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white pawn in x = %d y = %d\n", x, y);
+	printf("white king in x = %d y = %d\n", x, y);
+
+	int tmp_x, tmp_y;
+	for (int i = -1; i <= 1; i++)
+	{
+		tmp_x = x + i;
+		if ((tmp_x >= 0) && (tmp_x <= 7))
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				tmp_y = y + j;
+				if
+				(
+					(tmp_y >= 0) &&
+					(tmp_y <= 7) &&
+					(
+						is_empty(get_piece(g, tmp_x, tmp_y)) ||
+						is_black(g, tmp_x, tmp_y)
+					)
+				)
+				{
+					add_move(ml, tmp_x, tmp_y);
+				}
+			}
+		}
+	}
 }
 
 void fill_move_list(Game *g, int x, int y, Move_list *ml)
 {
 	switch (g->board[y][x])
 	{
-		case B_PAWN:
-			fill_move_list_black_pawn(g, x, y, ml);
-			break;
-		case B_ROOK:
-			fill_move_list_black_rook(g, x, y, ml);
-			break;
-		case B_KNIGHT:
-			fill_move_list_black_knight(g, x, y, ml);
-			break;
-		case B_BISHOP:
-			fill_move_list_black_bishop(g, x, y, ml);
-			break;
-		case B_QUEEN:
-			fill_move_list_black_queen(g, x, y, ml);
-			break;
-		case B_KING:
-			fill_move_list_black_king(g, x, y, ml);
-			break;
-		case W_PAWN:
-			fill_move_list_white_pawn(g, x, y, ml);
-			break;
-		case W_ROOK:
-			fill_move_list_white_rook(g, x, y, ml);
-			break;
-		case W_KNIGHT:
-			fill_move_list_white_knight(g, x, y, ml);
-			break;
-		case W_BISHOP:
-			fill_move_list_white_bishop(g, x, y, ml);
-			break;
-		case W_QUEEN:
-			fill_move_list_white_queen(g, x, y, ml);
-			break;
-		case W_KING:
-			fill_move_list_white_king(g, x, y, ml);
-			break;
-		default:
-			break;
+	case B_PAWN:
+		fill_move_list_black_pawn(g, x, y, ml);
+		break;
+	case B_ROOK:
+		fill_move_list_black_rook(g, x, y, ml);
+		break;
+	case B_KNIGHT:
+		fill_move_list_black_knight(g, x, y, ml);
+		break;
+	case B_BISHOP:
+		fill_move_list_black_bishop(g, x, y, ml);
+		break;
+	case B_QUEEN:
+		fill_move_list_black_queen(g, x, y, ml);
+		break;
+	case B_KING:
+		fill_move_list_black_king(g, x, y, ml);
+		break;
+	case W_PAWN:
+		fill_move_list_white_pawn(g, x, y, ml);
+		break;
+	case W_ROOK:
+		fill_move_list_white_rook(g, x, y, ml);
+		break;
+	case W_KNIGHT:
+		fill_move_list_white_knight(g, x, y, ml);
+		break;
+	case W_BISHOP:
+		fill_move_list_white_bishop(g, x, y, ml);
+		break;
+	case W_QUEEN:
+		fill_move_list_white_queen(g, x, y, ml);
+		break;
+	case W_KING:
+		fill_move_list_white_king(g, x, y, ml);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -218,8 +779,8 @@ void print_move_list(Move_list *ml)
 
 int main()
 {
-	char *fen = "rnbqkbnr/pppppppp/8/pP6/Pp6/8/PPPPPPPP/RNBQKBNR 0 KQkq a6 0 0";
-	Move_list *ml = possible_moves(fen, 1, 3);
+	char *fen = "rnbqkbnr/pppppppp/8/3k4/8/8/PPPPPPPP/RNBQKBNR 0 KQkq a6 0 0";
+	Move_list *ml = possible_moves(fen, 3, 3);
 	print_move_list(ml);
 	free_move_list(ml);
 
