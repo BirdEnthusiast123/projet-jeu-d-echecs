@@ -10,19 +10,19 @@
 
 typedef enum
 {
-	EMPTY = 1,
-	W_KNIGHT = 2,
-	W_QUEEN = 4,
-	W_KING = 8,
-	W_ROOK = 16,
-	W_BISHOP = 32,
-	W_PAWN = 64,
-	B_QUEEN = 128,
-	B_KING = 256,
-	B_ROOK = 512,
-	B_BISHOP = 1024,
-	B_PAWN = 2048,
-	B_KNIGHT = 4096
+	W_KNIGHT = 1,
+	W_QUEEN = 2,
+	W_KING = 3,
+	W_ROOK = 4,
+	W_BISHOP = 5,
+	W_PAWN = 6,
+	B_QUEEN = 8,
+	B_KING = 9,
+	B_ROOK = 10,
+	B_BISHOP = 11,
+	B_PAWN = 12,
+	B_KNIGHT = 13,
+	EMPTY = 16
 } Piece;
 
 typedef enum
@@ -68,9 +68,11 @@ int skip_spaces_string(char *str, int i);
 void init_game_board(Game *g);
 void free_game_board(Game *g);
 
-void parse_fen_char_pieces(Game *g, char c, int x, int y);
+void parse_fen_char_pieces(Game *g, char c, int x, int* y);
 void parse_fen_string_pieces(Game *g, char *fen_string);
 void parse_fen_string(Game *g, char *fen_string);
 
 void print_board(Game *g);
 void print_game(Game *g);
+
+Piece get_piece(Game* g, int x, int y);

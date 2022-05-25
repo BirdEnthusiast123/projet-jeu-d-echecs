@@ -51,59 +51,61 @@ void free_game_board(Game *g)
 	free(g->board);
 }
 
-void parse_fen_char_pieces(Game *g, char c, int x, int y)
+void parse_fen_char_pieces(Game *g, char c, int x, int* y)
 {
 	if (is_digit(c))
 	{
-		int tmp = y + parse_int_char(c);
-		for (int i = y; i < tmp; i++)
+		int tmp = *y + parse_int_char(c);
+		for (int i = *y; i < tmp; i++)
 		{
 			g->board[x][i] = EMPTY;
 		}
+		*y += parse_int_char(c);
 	}
 	else
 	{
 		switch (c)
 		{
 		case 'p':
-			g->board[x][y] = B_PAWN;
+			g->board[x][*y] = B_PAWN;
 			break;
 		case 'r':
-			g->board[x][y] = B_ROOK;
+			g->board[x][*y] = B_ROOK;
 			break;
 		case 'n':
-			g->board[x][y] = B_KNIGHT;
+			g->board[x][*y] = B_KNIGHT;
 			break;
 		case 'b':
-			g->board[x][y] = B_BISHOP;
+			g->board[x][*y] = B_BISHOP;
 			break;
 		case 'q':
-			g->board[x][y] = B_QUEEN;
+			g->board[x][*y] = B_QUEEN;
 			break;
 		case 'k':
-			g->board[x][y] = B_KING;
+			g->board[x][*y] = B_KING;
 			break;
 		case 'P':
-			g->board[x][y] = W_PAWN;
+			g->board[x][*y] = W_PAWN;
 			break;
 		case 'R':
-			g->board[x][y] = W_ROOK;
+			g->board[x][*y] = W_ROOK;
 			break;
 		case 'N':
-			g->board[x][y] = W_KNIGHT;
+			g->board[x][*y] = W_KNIGHT;
 			break;
 		case 'B':
-			g->board[x][y] = W_BISHOP;
+			g->board[x][*y] = W_BISHOP;
 			break;
 		case 'Q':
-			g->board[x][y] = W_QUEEN;
+			g->board[x][*y] = W_QUEEN;
 			break;
 		case 'K':
-			g->board[x][y] = W_KING;
+			g->board[x][*y] = W_KING;
 			break;
 		default:
 			break;
 		}
+		*y += 1;
 	}
 }
 
@@ -116,14 +118,15 @@ void parse_fen_string_pieces(Game *g, char *fen_string)
 		int y = 0;
 		while ((fen_string[i] != '/') && (fen_string[i] != ' '))
 		{
-			parse_fen_char_pieces(g, fen_string[i], x, y);
-			y++;
+			parse_fen_char_pieces(g, fen_string[i], x, &y);
+			//printf("y = %d ", y);
 			i++;
 		}
 		if (fen_string[i] == ' ')
 			return;
 		x++;
 		i++;
+		//printf("\n");
 	}
 }
 
@@ -176,7 +179,7 @@ void parse_fen_string(Game *g, char *fen_string)
 	{
 		g->en_pass.x = fen_string[i] - 'a';
 		i++;
-		g->en_pass.y = parse_int_char(fen_string[i]) - 1;
+		g->en_pass.y = 8 - parse_int_char(fen_string[i]);
 		i++;
 	}
 	else
@@ -221,19 +224,22 @@ void print_game(Game *g)
 	printf("full moves: %d\n", g->full_moves_count);
 }
 
-int main()
+Piece get_piece(Game* g, int x, int y)
 {
-	printf("hey\n");
-
-	Game g;
-
-	init_game_board(&g);
-
-	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0";
-	parse_fen_string(&g, fen);
-	print_game(&g);
-
-	free_game_board(&g);
-	return 0;
+	return g->board[y][x];
 }
 
+int is_black(Piece p)
+{
+	return (p | 8);
+}
+
+int is_white(Piece p)
+{
+	return (p < 8);
+}
+
+int is_empty(Piece p)
+{
+	return (p | 16);
+}

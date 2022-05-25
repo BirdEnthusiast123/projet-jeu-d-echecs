@@ -7,104 +7,145 @@ typedef struct
 {
 	int len;
 	int nb;
-	int* arr;
+	int *arr;
 } Move_list;
 
-Move_list* init_move_list()
+Move_list *init_move_list()
 {
-	Move_list* res = malloc(sizeof(Move_list));
+	Move_list *res = malloc(sizeof(Move_list));
 	res->len = MOVE_LIST_BUFFER_SIZE;
 	res->arr = malloc(MOVE_LIST_BUFFER_SIZE * sizeof(int));
 	res->nb = 0;
 }
 
-void add_move(Move_list* ml, int x, int y)
+void add_move(Move_list *ml, int x, int y)
 {
 	ml->arr[ml->nb] = x;
 	ml->arr[(ml->nb) + 1] = y;
 	ml->nb += 2;
-	
-	if( ((ml->nb) % MOVE_LIST_BUFFER_SIZE) == 0 )
+
+	if (((ml->nb) % MOVE_LIST_BUFFER_SIZE) == 0)
 	{
 		ml->len += MOVE_LIST_BUFFER_SIZE;
 		ml->arr = realloc(ml->arr, ml->len * sizeof(int));
 	}
 }
 
-void fill_move_list_black_pawn(Game* g, int x, int y, Move_list* ml)
+// post: check for promotion
+void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black pawn in x = %d y = %d\n", x, y);
-	if(g->board[y+1][x] == EMPTY)
+
+	// usual moves
+	if (get_piece(g, x, y + 1) == EMPTY)
 	{
-		add_move(ml, x, y+1);
-		
-		if((y == 1) && (g->board[3][x] == EMPTY))
+		add_move(ml, x, y + 1);
+
+		if ((y == 1) && (get_piece(g, x, 3) == EMPTY))
 		{
-			add_move(ml, x, y+2);
+			add_move(ml, x, y + 2);
 		}
 	}
+
+	// captures
+	if ((x > 0) && is_white(get_piece(g, x - 1, y + 1)))
+		add_move(ml, x - 1, y + 1);
+
+	if ((x < 7) && is_white(get_piece(g, x + 1, y + 1)))
+		add_move(ml, x + 1, y + 1);
+
+	// en passant
+	if (((x + 1) == g->en_pass.x) && ((y + 1) == g->en_pass.y))
+		add_move(ml, x + 1, y + 1);
+
+	if (((x - 1) == g->en_pass.x) && ((y + 1) == g->en_pass.y))
+		add_move(ml, x - 1, y + 1);
 }
 
-void fill_move_list_black_rook(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_black_rook(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black rook in x = %d y = %d\n", x, y);
 }
 
-void fill_move_list_black_knight(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black knight in x = %d y = %d\n", x, y);
 }
 
-void fill_move_list_black_bishop(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_black_bishop(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black bishop in x = %d y = %d\n", x, y);
 }
 
-void fill_move_list_black_queen(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_black_queen(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black queen in x = %d y = %d\n", x, y);
 }
 
-void fill_move_list_black_king(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 {
 	printf("black king in x = %d y = %d\n", x, y);
 }
 
-void fill_move_list_white_pawn(Game* g, int x, int y, Move_list* ml)
+void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 {
 	printf("white pawn in x = %d y = %d\n", x, y);
-}
 
-void fill_move_list_white_rook(Game* g, int x, int y, Move_list* ml)
-{
-	printf("white pawn in x = %d y = %d\n", x, y);
-}
-
-void fill_move_list_white_knight(Game* g, int x, int y, Move_list* ml)
-{
-	printf("white pawn in x = %d y = %d\n", x, y);
-}
-
-void fill_move_list_white_bishop(Game* g, int x, int y, Move_list* ml)
-{
-	printf("white pawn in x = %d y = %d\n", x, y);
-}
-
-void fill_move_list_white_queen(Game* g, int x, int y, Move_list* ml)
-{
-	printf("white pawn in x = %d y = %d\n", x, y);
-}
-
-void fill_move_list_white_king(Game* g, int x, int y, Move_list* ml)
-{
-	printf("white pawn in x = %d y = %d\n", x, y);
-}
-
-void fill_move_list(Game* g, int x, int y, Move_list* ml)
-{
-	switch(g->board[y][x])
+	// usual moves
+	if (get_piece(g, x, y - 1) == EMPTY)
 	{
+		add_move(ml, x, y - 1);
+
+		if ((y == 6) && (get_piece(g, x, 4) == EMPTY))
 		{
+			add_move(ml, x, y - 2);
+		}
+	}
+
+	// captures
+	if ((x > 0) && is_white(get_piece(g, x - 1, y - 1)))
+		add_move(ml, x - 1, y - 1);
+
+	if ((x < 7) && is_white(get_piece(g, x + 1, y - 1)))
+		add_move(ml, x + 1, y - 1);
+
+	// en passant
+	if (((x + 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
+		add_move(ml, x + 1, y - 1);
+
+	if (((x - 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
+		add_move(ml, x - 1, y - 1);
+}
+
+void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
+{
+	printf("white rookt in x = %d y = %d\n", x, y);
+}
+
+void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
+{
+	printf("white pawn in x = %d y = %d\n", x, y);
+}
+
+void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
+{
+	printf("white pawn in x = %d y = %d\n", x, y);
+}
+
+void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
+{
+	printf("white pawn in x = %d y = %d\n", x, y);
+}
+
+void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
+{
+	printf("white pawn in x = %d y = %d\n", x, y);
+}
+
+void fill_move_list(Game *g, int x, int y, Move_list *ml)
+{
+	switch (g->board[y][x])
+	{
 		case B_PAWN:
 			fill_move_list_black_pawn(g, x, y, ml);
 			break;
@@ -143,39 +184,44 @@ void fill_move_list(Game* g, int x, int y, Move_list* ml)
 			break;
 		default:
 			break;
-		}
 	}
 }
 
-Move_list* possible_moves(char* fen, int x, int y)
+Move_list *possible_moves(char *fen, int x, int y)
 {
 	Game g;
 	init_game_board(&g);
 	parse_fen_string(&g, fen);
-	
-	Move_list* res = init_move_list();
-	
+	print_game(&g);
+
+	Move_list *res = init_move_list();
+
 	fill_move_list(&g, x, y, res);
-	
+
 	free_game_board(&g);
 	return res;
 }
 
-void free_test(Move_list* t)
+void free_move_list(Move_list *ml)
 {
-	free(t->arr);
-	free(t);
+	free(ml->arr);
+	free(ml);
 }
 
+void print_move_list(Move_list *ml)
+{
+	for (int i = 0; i < ml->nb; i += 2)
+	{
+		printf("x = %d, y = %d\n", ml->arr[i], ml->arr[i + 1]);
+	}
+}
 
+int main()
+{
+	char *fen = "rnbqkbnr/pppppppp/8/pP6/Pp6/8/PPPPPPPP/RNBQKBNR 0 KQkq a6 0 0";
+	Move_list *ml = possible_moves(fen, 1, 3);
+	print_move_list(ml);
+	free_move_list(ml);
 
-
-
-
-
-
-
-
-
-
-
+	return 0;
+}

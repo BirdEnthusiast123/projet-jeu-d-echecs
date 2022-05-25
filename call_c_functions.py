@@ -18,7 +18,7 @@ t1 = TEST.from_address(lib.possible_moves(fen_string.encode(), 0, 1))
 for i in range(0, t1.nb):
 	print(t1.array[i])
 
-lib.free_test(ct.byref(t1))
+lib.free_move_list(ct.byref(t1))
 
 
 
