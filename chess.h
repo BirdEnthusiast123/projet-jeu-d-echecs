@@ -6,6 +6,8 @@
 #define B_KINGSIDE_CASTLE 4
 #define B_QUEENSIDE_CASTLE 8
 
+#define MOVE_LIST_BUFFER_SIZE 8
+
 typedef enum
 {
 	EMPTY = 1,

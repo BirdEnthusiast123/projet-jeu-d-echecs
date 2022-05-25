@@ -2,7 +2,7 @@ EXEC_FILE = possible_moves chessboard
 OBJECTS = possible_moves.o chessboard.o
 SOURCES = possible_moves.c chessboard.c
 
-CFLAGS = -c -g -Wall -Wextra -Werror
+CFLAGS = -c -g -Wall -Wextra
 
 .PHONY: all clean
 

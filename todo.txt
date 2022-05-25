@@ -19,10 +19,11 @@ set player side
 advantage indicator
 
 
-
-
-
 free memory between py and c
+
+atm board is initialized everytime moves are computed,
+could store board and fen string in memory and strcmp 
+the input fen string with stored string
 
 
 int main()
