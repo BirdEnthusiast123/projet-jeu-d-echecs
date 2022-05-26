@@ -1,6 +1,11 @@
+/** 
+ * \file chessboard.c
+ * \brief Source code relating to representation of a chess game
+ */
+
 #include "chess.h"
 
-
+/* General purpose functions */
 int is_digit(char c)
 {
 	return (c > 47) && (c < 58);
@@ -11,7 +16,10 @@ int parse_int_char(char c)
 	return c - 48;
 }
 
-// space or null terminated string : ' ' | '\0'
+/**
+ * \brief Parses space or null terminated strings
+ * and returns the parsed int
+ */
 int parse_int_string(char *str)
 {
 	int i = 0, res = 0;
@@ -25,6 +33,9 @@ int parse_int_string(char *str)
 	return res;
 }
 
+/**
+ * \brief Return the index of the first character that isn't a space
+ */
 int skip_spaces_string(char *str, int i)
 {
 	while (str[i] == ' ')
@@ -32,7 +43,14 @@ int skip_spaces_string(char *str, int i)
 	return i;
 }
 
-// post: free memory with free_game_board
+
+/* struct Game related functions */
+
+/**
+ * \brief Allocates the necessary memory for a Game struct
+ * 
+ * \post Free the allocated memory with the \c free_game_board function
+ */
 void init_game_board(Game *g)
 {
 	g->board = (Piece **)malloc(8 * sizeof(Piece *));
@@ -42,6 +60,9 @@ void init_game_board(Game *g)
 	}
 }
 
+/**
+ * \brief Frees the memory allocated by a Game struct
+ */
 void free_game_board(Game *g)
 {
 	for (int i = 0; i < 8; i++)
@@ -51,6 +72,11 @@ void free_game_board(Game *g)
 	free(g->board);
 }
 
+/**
+ * \brief Fills the Game's struct board at coordinates \c x, \c y
+ * in regards to the FEN chess notation associated with the
+ * parsed character
+ */
 void parse_fen_char_pieces(Game *g, char c, int x, int* y)
 {
 	if (is_digit(c))
@@ -110,6 +136,11 @@ void parse_fen_char_pieces(Game *g, char c, int x, int* y)
 }
 
 // probably optimizable
+/**
+ * \brief Fills the Game's struct board 
+ * in regards to the FEN chess notation associated with the
+ * parsed string
+ */
 void parse_fen_string_pieces(Game *g, char *fen_string)
 {
 	int i = 0, x = 0;
@@ -119,17 +150,19 @@ void parse_fen_string_pieces(Game *g, char *fen_string)
 		while ((fen_string[i] != '/') && (fen_string[i] != ' '))
 		{
 			parse_fen_char_pieces(g, fen_string[i], x, &y);
-			//printf("y = %d ", y);
 			i++;
 		}
 		if (fen_string[i] == ' ')
 			return;
 		x++;
 		i++;
-		//printf("\n");
 	}
 }
 
+ /** \brief Fills the Game struct 
+ * in regards to the FEN chess notation associated with the
+ * parsed string
+ */
 void parse_fen_string(Game *g, char *fen_string)
 {
 	int i = 0;

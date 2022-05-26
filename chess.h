@@ -1,13 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * \def W_KINGSIDE_CASTLE
+ * \brief Bit representation of different possible castles
+ */
 #define W_KINGSIDE_CASTLE 1
 #define W_QUEENSIDE_CASTLE 2
 #define B_KINGSIDE_CASTLE 4
 #define B_QUEENSIDE_CASTLE 8
 
+/**
+ * \def MOVE_LIST_BUFFER_SIZE
+ * \brief Base size for Move_list struct array
+ */
 #define MOVE_LIST_BUFFER_SIZE 8
 
+/**
+ * \enum Piece
+ * \brief Representation of chess pieces and emptiness
+ */
 typedef enum
 {
 	W_KNIGHT = 1,
@@ -25,31 +37,30 @@ typedef enum
 	EMPTY = 16
 } Piece;
 
+/**
+ * \enum Player
+ * \brief Representation of players
+ */
 typedef enum
 {
 	black = 'b',
 	white = 'w'
 } Player;
 
-typedef struct 
+/**
+ * \struct Position
+ * \brief Representation of a chess position
+ */
+typedef struct
 {
 	int x;
 	int y;
 } Position;
 
-typedef struct
-{
-    Position* from;
-    Position* to;
-    Piece piece;
-} Move;
-
-typedef struct
-{
-	int len;
-	Move* move_arr;
-} Move_arr;
-
+/**
+ * \struct Game
+ * \brief Representation of a chess game
+ */
 typedef struct
 {
 	Piece **board;
@@ -60,7 +71,6 @@ typedef struct
 	int full_moves_count;
 } Game;
 
-
 // chessboard.c functions
 int is_digit(char c);
 int parse_int_char(char c);
@@ -70,24 +80,26 @@ int skip_spaces_string(char *str, int i);
 void init_game_board(Game *g);
 void free_game_board(Game *g);
 
-void parse_fen_char_pieces(Game *g, char c, int x, int* y);
+void parse_fen_char_pieces(Game *g, char c, int x, int *y);
 void parse_fen_string_pieces(Game *g, char *fen_string);
 void parse_fen_string(Game *g, char *fen_string);
 
 void print_board(Game *g);
 void print_game(Game *g);
 
-Piece get_piece(Game* g, int x, int y);
+Piece get_piece(Game *g, int x, int y);
 
 int is_black(Piece p);
 int is_white(Piece p);
 int is_empty(Piece p);
 
 
-
-// move list for a singular piece
-// arr is x and y coordinates one after another
-// ew : [x1, y1, x2, y2]
+/**
+ * \struct Position
+ * \brief Representation of a list of chess moves possible for 
+ * one signular piece \n
+ * arr contains coordinates contiguously, example : [x1, y1, x2, y2]
+ */
 typedef struct
 {
 	int len;

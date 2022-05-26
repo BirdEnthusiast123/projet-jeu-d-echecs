@@ -30,6 +30,7 @@ B_KNIGHT = 4096
 
 BASE_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
+# Some function calls throw an error if Tk environment is not initialized
 root = tk.Tk()
 
 W_KNIGHT_SPRITE = tk.PhotoImage(file='pieces/knight_w.png').subsample(7)
@@ -91,9 +92,9 @@ class Move_list(ct.Structure):
 				('array', ct.POINTER(ct.c_int))]
 
 	def __init__(self):
-		self.nb = 0;
+		self.nb = 0
 
-
+# chess game representation
 class Game:
 
 	def __init__(self, fen_string):
@@ -168,7 +169,7 @@ class Game:
 		print(self.fen)
 		#also update rest of fen (castles etc)
 
-
+# Canvas, graphic interface
 class Chess_board(tk.Canvas):
 	def __init__(self, root, wdth, hght, game):
 		super().__init__(root, width=wdth, height=hght)

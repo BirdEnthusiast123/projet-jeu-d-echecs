@@ -1,5 +1,8 @@
 #include "chess.h"
 
+ /** \brief Initializes and allocates the memory necessary
+  * \post Free the allocated memory with the \c free_move_list function
+ */
 Move_list *init_move_list()
 {
 	Move_list *res = malloc(sizeof(Move_list));
@@ -9,6 +12,24 @@ Move_list *init_move_list()
 	return res;
 }
 
+ /** \brief Frees the memory allocated by a Move_list struct
+ */
+void free_move_list(Move_list *ml)
+{
+	free(ml->arr);
+	free(ml);
+}
+
+void print_move_list(Move_list *ml)
+{
+	for (int i = 0; i < ml->nb; i += 2)
+	{
+		printf("x = %d, y = %d\n", ml->arr[i], ml->arr[i + 1]);
+	}
+}
+
+ /** \brief Adds the move \c x, \c y to the Move-list struct
+ */
 void add_move(Move_list *ml, int x, int y)
 {
 	ml->arr[ml->nb] = x;
@@ -669,6 +690,10 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 	}
 }
 
+ /** \brief Fills the array of a Move_list struct
+  * with the possible moves achievable by the piece at coordinates \c x, \c y
+  * in the game described by the fen string
+ */
 void fill_move_list(Game *g, int x, int y, Move_list *ml)
 {
 	switch (g->board[y][x])
@@ -715,6 +740,10 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 	print_move_list(ml);
 }
 
+ /** \brief Initializes and fills the array of a Move_list struct
+  * with the possible moves achievable by the piece at coordinates \c x, \c y
+  * in the game described by the fen string
+ */
 Move_list *possible_moves(char *fen, int x, int y)
 {
 	Game g;
@@ -729,17 +758,4 @@ Move_list *possible_moves(char *fen, int x, int y)
 	return res;
 }
 
-void free_move_list(Move_list *ml)
-{
-	free(ml->arr);
-	free(ml);
-}
-
-void print_move_list(Move_list *ml)
-{
-	for (int i = 0; i < ml->nb; i += 2)
-	{
-		printf("x = %d, y = %d\n", ml->arr[i], ml->arr[i + 1]);
-	}
-}
 
