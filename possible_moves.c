@@ -1,21 +1,12 @@
 #include "chess.h"
 
-// move list for a singular piece
-// arr is x and y coordinates one after another
-// ew : [x1, y1, x2, y2]
-typedef struct
-{
-	int len;
-	int nb;
-	int *arr;
-} Move_list;
-
 Move_list *init_move_list()
 {
 	Move_list *res = malloc(sizeof(Move_list));
 	res->len = MOVE_LIST_BUFFER_SIZE;
 	res->arr = malloc(MOVE_LIST_BUFFER_SIZE * sizeof(int));
 	res->nb = 0;
+	return res;
 }
 
 void add_move(Move_list *ml, int x, int y)
@@ -34,8 +25,6 @@ void add_move(Move_list *ml, int x, int y)
 // post: check for promotion
 void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black pawn in x = %d y = %d\n", x, y);
-
 	// usual moves
 	if (get_piece(g, x, y + 1) == EMPTY)
 	{
@@ -64,8 +53,6 @@ void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_black_rook(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black rook in x = %d y = %d\n", x, y);
-
 	// up
 	int tmp = x - 1;
 	while (tmp >= 0)
@@ -145,8 +132,6 @@ void fill_move_list_black_rook(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black knight in x = %d y = %d\n", x, y);
-
 	int tmp_x = x - 2;
 	int tmp_y;
 	Piece tmp_p;
@@ -237,8 +222,6 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_black_bishop(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black bishop in x = %d y = %d\n", x, y);
-
 	int tmp_x = x + 1, tmp_y = y + 1;
 	Piece p;
 	// Sout east
@@ -330,17 +313,12 @@ void fill_move_list_black_bishop(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_black_queen(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black queen in x = %d y = %d\n", x, y);
-
 	fill_move_list_black_rook(g, x, y, ml);
-
 	fill_move_list_black_bishop(g, x, y, ml);
 }
 
 void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 {
-	printf("black king in x = %d y = %d\n", x, y);
-
 	int tmp_x, tmp_y;
 	for (int i = -1; i <= 1; i++)
 	{
@@ -356,7 +334,7 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 					(tmp_y <= 7) &&
 					(
 						is_empty(get_piece(g, tmp_x, tmp_y)) ||
-						is_white(g, tmp_x, tmp_y)
+						is_white(get_piece(g, tmp_x, tmp_y))
 					)
 				)
 				{
@@ -370,8 +348,6 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 // post: check for promotion
 void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white pawn in x = %d y = %d\n", x, y);
-
 	// usual moves
 	if (get_piece(g, x, y - 1) == EMPTY)
 	{
@@ -384,10 +360,10 @@ void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 	}
 
 	// captures
-	if ((x > 0) && is_white(get_piece(g, x - 1, y - 1)))
+	if ((x > 0) && is_black(get_piece(g, x - 1, y - 1)))
 		add_move(ml, x - 1, y - 1);
 
-	if ((x < 7) && is_white(get_piece(g, x + 1, y - 1)))
+	if ((x < 7) && is_black(get_piece(g, x + 1, y - 1)))
 		add_move(ml, x + 1, y - 1);
 
 	// en passant
@@ -400,8 +376,6 @@ void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white rook in x = %d y = %d\n", x, y);
-
 	// up
 	int tmp = x - 1;
 	while (tmp >= 0)
@@ -452,7 +426,7 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp, y);
+			add_move(ml, x, tmp);
 			break;
 		}
 		else
@@ -471,7 +445,7 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp, y);
+			add_move(ml, x, tmp);
 			break;
 		}
 		else
@@ -481,8 +455,6 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white knight in x = %d y = %d\n", x, y);
-
 	int tmp_x = x - 2;
 	int tmp_y;
 	Piece tmp_p;
@@ -573,8 +545,6 @@ void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white bishop in x = %d y = %d\n", x, y);
-
 	int tmp_x = x + 1, tmp_y = y + 1;
 	Piece p;
 	// Sout east
@@ -643,8 +613,8 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 	// North west
 	tmp_x = x - 1;
-	tmp_y = y + 1;
-	while ((tmp_x >= 0) && (tmp_y <= 7))
+	tmp_y = y - 1;
+	while ((tmp_x >= 0) && (tmp_y >= 0))
 	{
 		p = get_piece(g, tmp_x, tmp_y);
 
@@ -652,7 +622,7 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 		{
 			add_move(ml, tmp_x, tmp_y);
 			tmp_x--;
-			tmp_y++;
+			tmp_y--;
 		}
 		else if (is_black(p))
 		{
@@ -666,8 +636,6 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white queen in x = %d y = %d\n", x, y);
-
 	fill_move_list_white_rook(g, x, y, ml);
 
 	fill_move_list_white_bishop(g, x, y, ml);
@@ -675,8 +643,6 @@ void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
 
 void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 {
-	printf("white king in x = %d y = %d\n", x, y);
-
 	int tmp_x, tmp_y;
 	for (int i = -1; i <= 1; i++)
 	{
@@ -692,7 +658,7 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 					(tmp_y <= 7) &&
 					(
 						is_empty(get_piece(g, tmp_x, tmp_y)) ||
-						is_black(g, tmp_x, tmp_y)
+						is_black(get_piece(g, tmp_x, tmp_y))
 					)
 				)
 				{
@@ -746,6 +712,7 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 	default:
 		break;
 	}
+	print_move_list(ml);
 }
 
 Move_list *possible_moves(char *fen, int x, int y)
@@ -753,7 +720,6 @@ Move_list *possible_moves(char *fen, int x, int y)
 	Game g;
 	init_game_board(&g);
 	parse_fen_string(&g, fen);
-	print_game(&g);
 
 	Move_list *res = init_move_list();
 
@@ -777,12 +743,3 @@ void print_move_list(Move_list *ml)
 	}
 }
 
-int main()
-{
-	char *fen = "rnbqkbnr/pppppppp/8/3k4/8/8/PPPPPPPP/RNBQKBNR 0 KQkq a6 0 0";
-	Move_list *ml = possible_moves(fen, 3, 3);
-	print_move_list(ml);
-	free_move_list(ml);
-
-	return 0;
-}

@@ -231,7 +231,7 @@ Piece get_piece(Game* g, int x, int y)
 
 int is_black(Piece p)
 {
-	return (p | 8);
+	return (p & 8);
 }
 
 int is_white(Piece p)

@@ -60,6 +60,8 @@ typedef struct
 	int full_moves_count;
 } Game;
 
+
+// chessboard.c functions
 int is_digit(char c);
 int parse_int_char(char c);
 int parse_int_string(char *str);
@@ -76,3 +78,27 @@ void print_board(Game *g);
 void print_game(Game *g);
 
 Piece get_piece(Game* g, int x, int y);
+
+int is_black(Piece p);
+int is_white(Piece p);
+int is_empty(Piece p);
+
+
+
+// move list for a singular piece
+// arr is x and y coordinates one after another
+// ew : [x1, y1, x2, y2]
+typedef struct
+{
+	int len;
+	int nb;
+	int *arr;
+} Move_list;
+
+// possible_moves.c functions
+Move_list *init_move_list();
+void add_move(Move_list *ml, int x, int y);
+void fill_move_list(Game *g, int x, int y, Move_list *ml);
+Move_list *possible_moves(char *fen, int x, int y);
+void free_move_list(Move_list *ml);
+void print_move_list(Move_list *ml);
