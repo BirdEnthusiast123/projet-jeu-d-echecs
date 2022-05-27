@@ -1,4 +1,7 @@
 from tkinter import * 
+import sys
+
+print(sys.version_info)
 
 def test(canvas):
     img = PhotoImage(file='./knight_b.png')

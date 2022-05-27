@@ -38,13 +38,6 @@ int main()
 	parse_fen_string(&g, fen);
 	print_game(&g);
 	
-	Move* m = get_move();
-	m->from = get_position();
-	m->to = get_position();
-	
-	free_position(m->from);
-	free_position(m->to);
-	free_move(m);
 
 	free_game_board(&g);
 	
@@ -53,3 +46,16 @@ int main()
 
 	return 0;
 }
+
+
+
+
+
+test for checks (supposed both kings cant be in check at once):
+	do move
+	make sure king is not threatened:
+		threatmap is copy of game :
+			n == 0 means safe
+			n > 0  means threatened by n foes
+		computed by checking all of oponents possible moves:
+			keep track of oponents pieces coordinates at the moment of the fen string parse

@@ -1,3 +1,9 @@
+/** 
+ * \file possible_moves.c
+ * \brief Source code relating to the computation of the moves
+ * a piece can make (does not account for checks and pins)
+ */
+
 #include "chess.h"
 
  /** \brief Initializes and allocates the memory necessary

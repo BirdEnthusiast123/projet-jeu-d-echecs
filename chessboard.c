@@ -53,10 +53,10 @@ int skip_spaces_string(char *str, int i)
  */
 void init_game_board(Game *g)
 {
-	g->board = (Piece **)malloc(8 * sizeof(Piece *));
+	g->board = malloc(8 * sizeof *g->board);
 	for (int i = 0; i < 8; i++)
 	{
-		g->board[i] = (Piece *)malloc(8 * sizeof(Piece));
+		g->board[i] = malloc(8 * sizeof *g->board[i]);
 	}
 }
 
@@ -276,3 +276,4 @@ int is_empty(Piece p)
 {
 	return (p == EMPTY);
 }
+

@@ -69,6 +69,12 @@ typedef struct
 	Position en_pass;
 	int half_moves_count;
 	int full_moves_count;
+
+	int enemy_pieces_count;
+	Position enemy_pieces[16];
+
+	int **threatmap;
+	// todo
 } Game;
 
 // chessboard.c functions
@@ -93,10 +99,9 @@ int is_black(Piece p);
 int is_white(Piece p);
 int is_empty(Piece p);
 
-
 /**
  * \struct Position
- * \brief Representation of a list of chess moves possible for 
+ * \brief Representation of a list of chess moves possible for
  * one signular piece \n
  * arr contains coordinates contiguously, example : [x1, y1, x2, y2]
  */
