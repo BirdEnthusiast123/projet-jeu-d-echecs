@@ -64,7 +64,7 @@ typedef struct
 typedef struct
 {
 	Piece **board;
-	Player player;
+	int bool_is_black;
 	int castles;
 	Position en_pass;
 	int half_moves_count;
@@ -73,7 +73,7 @@ typedef struct
 	int enemy_pieces_count;
 	Position enemy_pieces[16];
 
-	int **threatmap;
+	int threatmap[8][8];
 	// todo
 } Game;
 

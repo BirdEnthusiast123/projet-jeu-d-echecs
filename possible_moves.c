@@ -765,3 +765,7 @@ Move_list *possible_moves(char *fen, int x, int y)
 }
 
 
+/*
+fonction créant l'intégralité de la threatmap 
+fonction qui, en créant la threatmap, teste si une coordonnée est ajoutée à la map
+*/

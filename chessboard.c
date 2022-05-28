@@ -131,6 +131,16 @@ void parse_fen_char_pieces(Game *g, char c, int x, int* y)
 		default:
 			break;
 		}
+		if
+		( 
+			(g->bool_is_black && is_white(g->board[x][*y])) ||
+			(!(g->bool_is_black) && is_black(g->board[x][*y])) 
+		)
+		{
+			g->enemy_pieces[g->enemy_pieces_count].x = x;
+			g->enemy_pieces[g->enemy_pieces_count].y = *y;			
+			g->enemy_pieces_count++;
+		}
 		*y += 1;
 	}
 }
@@ -168,17 +178,18 @@ void parse_fen_string(Game *g, char *fen_string)
 	int i = 0;
 
 	// pieces
-	parse_fen_string_pieces(g, fen_string);
 	while (fen_string[i] != ' ')
 		i++;
 
 	i = skip_spaces_string(fen_string, i);
 
 	// color to play
-	g->player = (fen_string[i] == 'w') ? white : black;
+	g->bool_is_black = (fen_string[i] == 'b');
 	i++;
 
 	i = skip_spaces_string(fen_string, i);
+
+	parse_fen_string_pieces(g, fen_string);
 
 	// possible castles KQkq
 	g->castles = 0;
@@ -250,11 +261,17 @@ void print_board(Game *g)
 void print_game(Game *g)
 {
 	print_board(g);
-	printf("player: %c\n", g->player);
+	printf("player: %c\n", g->bool_is_black);
 	printf("castle: %d\n", g->castles);
 	printf("en passant: x = %d y = %d\n", g->en_pass.x, g->en_pass.y);
 	printf("half moves: %d\n", g->half_moves_count);
 	printf("full moves: %d\n", g->full_moves_count);
+	printf("enemy pieces count : %d\n", g->enemy_pieces_count);
+	for (int i = 0; i < g->enemy_pieces_count; i++)
+	{
+		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
+	}
+	
 }
 
 Piece get_piece(Game* g, int x, int y)
@@ -277,3 +294,21 @@ int is_empty(Piece p)
 	return (p == EMPTY);
 }
 
+int main()
+{
+	printf("hey\n");
+
+	Game g;
+
+	init_game_board(&g);
+
+	//char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0";
+	char* fen2 = "rnb1k2r/p1p1pp1p/3b1n2/2pp1p2/1q3P2/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
+	parse_fen_string(&g, fen2);
+	print_game(&g);
+	
+
+	free_game_board(&g);
+
+	return 0;
+}
