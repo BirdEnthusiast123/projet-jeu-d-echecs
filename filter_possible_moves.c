@@ -324,16 +324,15 @@ void fill_threatmap(Game* g)
     }
 
     Move_list *ml = init_move_list();
+	printf("here fill_threatmap enemy pieces count = %d\n", g->enemy_pieces_count);
 
     for (int i = 0; i < g->enemy_pieces_count; i++)
     {
         fill_capture_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
         for (int j = 0; j < ml->nb; j += 2)
         {
-            printf("ml->nb = %d, ", ml->nb);
             g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
         }
-        printf("\n");
         ml->nb = 0;
     }
 
@@ -357,7 +356,7 @@ void print_threatmap(Game* g)
 int is_king_threatened(Game* g)
 {
     fill_threatmap(g);
-    return g->threatmap[g->king_pos.y][g->king_pos.x];
+    return g->threatmap[g->king_pos.x][g->king_pos.y];
 }
 
 int main()

@@ -57,6 +57,8 @@ void init_game_board(Game *g)
 	{
 		g->board[i] = malloc(8 * sizeof *g->board[i]);
 	}
+
+	g->enemy_pieces_count = 0;
 }
 
 /**
@@ -272,7 +274,7 @@ void print_board(Game *g)
 void print_game(Game *g)
 {
 	print_board(g);
-	printf("player: %c\n", g->bool_is_black);
+	printf("player boolean (is_black): %d\n", g->bool_is_black);
 	printf("castle: %d\n", g->castles);
 	printf("en passant: x = %d y = %d\n", g->en_pass.x, g->en_pass.y);
 	printf("half moves: %d\n", g->half_moves_count);
@@ -283,6 +285,7 @@ void print_game(Game *g)
 		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
 	}
 	printf("\n");
+	printf("king : x = %d, y = %d \n", g->king_pos.x, g->king_pos.y);
 }
 
 Piece get_piece(Game *g, int x, int y)

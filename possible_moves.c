@@ -63,10 +63,13 @@ void add_move_if_not_threatening_king
 	g->board[new_y][new_x] = p;
 	g->board[y][x] = EMPTY;
 
+	printf("here addmove\n");
+	print_game(g);
+
 	if(is_king_threatened(g) == 0)
 		add_move(ml, new_x, new_y);
 	
-	g->board[new_x][new_y] = tmp_p;
+	g->board[new_y][new_x] = tmp_p;
 	g->board[y][x] = p;
 }
 
@@ -203,7 +206,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 
@@ -211,7 +214,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 	}
@@ -224,7 +227,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 
@@ -232,7 +235,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 	}
@@ -245,7 +248,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 
@@ -253,7 +256,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 	}
@@ -266,7 +269,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 
@@ -274,7 +277,7 @@ void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_white(tmp_p))
+			if (!(is_black(tmp_p)))
 				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KNIGHT);
 		}
 	}
@@ -396,7 +399,12 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 					(!is_black(get_piece(g, tmp_x, tmp_y)))
 				)
 				{
+					int x_mem = g->king_pos.x, y_mem = g->king_pos.y;
+					g->king_pos.x = tmp_y;
+					g->king_pos.y = tmp_x;
 					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KING);
+					g->king_pos.x = x_mem;
+					g->king_pos.y = y_mem;
 				}
 			}
 		}
@@ -409,38 +417,34 @@ void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 	// usual moves
 	if (get_piece(g, x, y - 1) == EMPTY)
 	{
-		add_move(ml, x, y - 1);
+		add_move_if_not_threatening_king(g, ml, x, y, x, y - 1, W_PAWN);
 
 		if ((y == 6) && (get_piece(g, x, 4) == EMPTY))
 		{
-			add_move(ml, x, y - 2);
+			add_move_if_not_threatening_king(g, ml, x, y, x, y - 2, W_PAWN);
 		}
 	}
 
 	// captures
 	if ((x > 0) && is_black(get_piece(g, x - 1, y - 1)))
-	{
-
-		add_move(ml, x - 1, y - 1);
-	}
+		add_move_if_not_threatening_king(g, ml, x, y, x - 1, y - 1, W_PAWN);
 
 	if ((x < 7) && is_black(get_piece(g, x + 1, y - 1)))
-	{
-
-		add_move(ml, x + 1, y - 1);
-	}
+		add_move_if_not_threatening_king(g, ml, x, y, x + 1, y - 1, W_PAWN);
 
 	// en passant
 	if (((x + 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
 	{
-
-		add_move(ml, x + 1, y - 1);
+		g->board[y][x+1] = EMPTY;
+		add_move_if_not_threatening_king(g, ml, x, y, x + 1, y - 1, W_PAWN);
+		g->board[y][x+1] = B_PAWN;
 	}
 
 	if (((x - 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
 	{
-
-		add_move(ml, x - 1, y - 1);
+		g->board[y][x-1] = EMPTY;
+		add_move_if_not_threatening_king(g, ml, x, y, x - 1, y - 1, W_PAWN);
+		g->board[y][x-1] = B_PAWN;
 	}
 }
 
@@ -453,12 +457,12 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		Piece p = get_piece(g, tmp, y);
 		if (is_empty(p))
 		{
-			add_move(ml, tmp, y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp, y, W_ROOK);
 			tmp--;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp, y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp, y, W_ROOK);
 			break;
 		}
 		else
@@ -472,12 +476,12 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		Piece p = get_piece(g, tmp, y);
 		if (is_empty(p))
 		{
-			add_move(ml, tmp, y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp, y, W_ROOK);
 			tmp++;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp, y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp, y, W_ROOK);
 			break;
 		}
 		else
@@ -491,12 +495,12 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		Piece p = get_piece(g, x, tmp);
 		if (is_empty(p))
 		{
-			add_move(ml, x, tmp);
+			add_move_if_not_threatening_king(g, ml, x, y, x, tmp, W_ROOK);
 			tmp--;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, x, tmp);
+			add_move_if_not_threatening_king(g, ml, x, y, x, tmp, W_ROOK);
 			break;
 		}
 		else
@@ -510,12 +514,12 @@ void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml)
 		Piece p = get_piece(g, x, tmp);
 		if (is_empty(p))
 		{
-			add_move(ml, x, tmp);
+			add_move_if_not_threatening_king(g, ml, x, y, x, tmp, W_ROOK);
 			tmp++;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, x, tmp);
+			add_move_if_not_threatening_king(g, ml, x, y, x, tmp, W_ROOK);
 			break;
 		}
 		else
@@ -536,20 +540,16 @@ void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 
 		tmp_y = y + 1;
 		if (tmp_y <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 	}
 
@@ -561,20 +561,16 @@ void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_y >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 
 		tmp_y = y + 1;
 		if (tmp_y <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 	}
 
@@ -586,20 +582,16 @@ void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 
 		tmp_x = x + 1;
 		if (tmp_x <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 	}
 
@@ -611,20 +603,16 @@ void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml)
 		if (tmp_x >= 0)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 
 		tmp_x = x + 1;
 		if (tmp_x <= 7)
 		{
 			tmp_p = get_piece(g, tmp_x, tmp_y);
-			if (is_empty(tmp_p) || is_black(tmp_p))
-			{
-				add_move(ml, tmp_x, tmp_y);
-			}
+			if (!(is_white(tmp_p)))
+				add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KNIGHT);
 		}
 	}
 }
@@ -640,13 +628,13 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 		if (is_empty(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			tmp_x++;
 			tmp_y++;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			break;
 		}
 		else
@@ -662,13 +650,13 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 		if (is_empty(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			tmp_x--;
 			tmp_y++;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			break;
 		}
 		else
@@ -684,13 +672,13 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 		if (is_empty(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			tmp_x++;
 			tmp_y--;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			break;
 		}
 		else
@@ -706,13 +694,13 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 
 		if (is_empty(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			tmp_x--;
 			tmp_y--;
 		}
 		else if (is_black(p))
 		{
-			add_move(ml, tmp_x, tmp_y);
+			add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_BISHOP);
 			break;
 		}
 		else
@@ -723,8 +711,8 @@ void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml)
 void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
 {
 	fill_move_list_white_rook(g, x, y, ml);
-
 	fill_move_list_white_bishop(g, x, y, ml);
+	g->board[y][x] = W_QUEEN;
 }
 
 void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
@@ -743,7 +731,12 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 					(tmp_y <= 7) &&
 					((!is_white(get_piece(g, tmp_x, tmp_y)))))
 				{
-					add_move(ml, tmp_x, tmp_y);
+					int x_mem = g->king_pos.x, y_mem = g->king_pos.y;
+					g->king_pos.x = tmp_y;
+					g->king_pos.y = tmp_x;
+					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KING);
+					g->king_pos.x = x_mem;
+					g->king_pos.y = y_mem;
 				}
 			}
 		}
