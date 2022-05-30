@@ -29,6 +29,7 @@ B_PAWN = 2048
 B_KNIGHT = 4096
 
 BASE_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+TEST_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1"
 
 # Some function calls throw an error if Tk environment is not initialized
 root = tk.Tk()
@@ -241,7 +242,6 @@ class Chess_board(tk.Canvas):
 		if(self.ml.nb != 0):
 			for i in range(0, self.ml.nb, 2):
 				if(new_x == self.ml.array[i] and new_y == self.ml.array[i+1]):
-					print("here1")
 					self.game.grid[new_y][new_x] = self.game.grid[self.mouse_input_y][self.mouse_input_x]
 					self.game.grid[self.mouse_input_y][self.mouse_input_x] = EMPTY
 					self.game.update_fen()
@@ -276,7 +276,7 @@ class Chess_board(tk.Canvas):
 
 
 def main():
-	game = Game(BASE_FEN)
+	game = Game(TEST_FEN)
 
 	ex = Chess_board(root, str(TOTAL_SIZE), str(TOTAL_SIZE), game)
 	ex.pack()

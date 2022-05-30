@@ -1,4 +1,4 @@
-/** 
+/**
  * \file chessboard.c
  * \brief Source code relating to representation of a chess game
  */
@@ -43,12 +43,11 @@ int skip_spaces_string(char *str, int i)
 	return i;
 }
 
-
 /* struct Game related functions */
 
 /**
  * \brief Allocates the necessary memory for a Game struct
- * 
+ *
  * \post Free the allocated memory with the \c free_game_board function
  */
 void init_game_board(Game *g)
@@ -77,7 +76,7 @@ void free_game_board(Game *g)
  * in regards to the FEN chess notation associated with the
  * parsed character
  */
-void parse_fen_char_pieces(Game *g, char c, int x, int* y)
+void parse_fen_char_pieces(Game *g, char c, int x, int *y)
 {
 	if (is_digit(c))
 	{
@@ -92,62 +91,74 @@ void parse_fen_char_pieces(Game *g, char c, int x, int* y)
 	{
 		switch (c)
 		{
-		case 'p':
-			g->board[x][*y] = B_PAWN;
-			break;
-		case 'r':
-			g->board[x][*y] = B_ROOK;
-			break;
-		case 'n':
-			g->board[x][*y] = B_KNIGHT;
-			break;
-		case 'b':
-			g->board[x][*y] = B_BISHOP;
-			break;
-		case 'q':
-			g->board[x][*y] = B_QUEEN;
-			break;
-		case 'k':
-			g->board[x][*y] = B_KING;
-			break;
-		case 'P':
-			g->board[x][*y] = W_PAWN;
-			break;
-		case 'R':
-			g->board[x][*y] = W_ROOK;
-			break;
-		case 'N':
-			g->board[x][*y] = W_KNIGHT;
-			break;
-		case 'B':
-			g->board[x][*y] = W_BISHOP;
-			break;
-		case 'Q':
-			g->board[x][*y] = W_QUEEN;
-			break;
-		case 'K':
-			g->board[x][*y] = W_KING;
-			break;
-		default:
-			break;
+			case 'p':
+				g->board[x][*y] = B_PAWN;
+				break;
+			case 'r':
+				g->board[x][*y] = B_ROOK;
+				break;
+			case 'n':
+				g->board[x][*y] = B_KNIGHT;
+				break;
+			case 'b':
+				g->board[x][*y] = B_BISHOP;
+				break;
+			case 'q':
+				g->board[x][*y] = B_QUEEN;
+				break;
+			case 'k':
+				g->board[x][*y] = B_KING;
+				if(g->bool_is_black)
+				{
+					g->king_pos.x = x;
+					g->king_pos.y = *y;
+				}
+				break;
+			case 'P':
+				g->board[x][*y] = W_PAWN;
+				break;
+			case 'R':
+				g->board[x][*y] = W_ROOK;
+				break;
+			case 'N':
+				g->board[x][*y] = W_KNIGHT;
+				break;
+			case 'B':
+				g->board[x][*y] = W_BISHOP;
+				break;
+			case 'Q':
+				g->board[x][*y] = W_QUEEN;
+				break;
+			case 'K':
+				g->board[x][*y] = W_KING;
+				if(!(g->bool_is_black))
+				{
+					g->king_pos.x = x;
+					g->king_pos.y = *y;
+				}
+				break;
+			default:
+				break;
 		}
-		if
-		( 
+
+		if 
+		(
 			(g->bool_is_black && is_white(g->board[x][*y])) ||
-			(!(g->bool_is_black) && is_black(g->board[x][*y])) 
+			(!(g->bool_is_black) && is_black(g->board[x][*y]))
 		)
 		{
 			g->enemy_pieces[g->enemy_pieces_count].x = x;
-			g->enemy_pieces[g->enemy_pieces_count].y = *y;			
+			g->enemy_pieces[g->enemy_pieces_count].y = *y;
 			g->enemy_pieces_count++;
 		}
+
 		*y += 1;
 	}
 }
 
 // probably optimizable
 /**
- * \brief Fills the Game's struct board 
+ * \brief Fills the Game's struct board
  * in regards to the FEN chess notation associated with the
  * parsed string
  */
@@ -169,7 +180,7 @@ void parse_fen_string_pieces(Game *g, char *fen_string)
 	}
 }
 
- /** \brief Fills the Game struct 
+/** \brief Fills the Game struct
  * in regards to the FEN chess notation associated with the
  * parsed string
  */
@@ -271,10 +282,10 @@ void print_game(Game *g)
 	{
 		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
 	}
-	
+	printf("\n");
 }
 
-Piece get_piece(Game* g, int x, int y)
+Piece get_piece(Game *g, int x, int y)
 {
 	return g->board[y][x];
 }
@@ -292,23 +303,4 @@ int is_white(Piece p)
 int is_empty(Piece p)
 {
 	return (p == EMPTY);
-}
-
-int main()
-{
-	printf("hey\n");
-
-	Game g;
-
-	init_game_board(&g);
-
-	//char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0";
-	char* fen2 = "rnb1k2r/p1p1pp1p/3b1n2/2pp1p2/1q3P2/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
-	parse_fen_string(&g, fen2);
-	print_game(&g);
-	
-
-	free_game_board(&g);
-
-	return 0;
 }

@@ -1,3 +1,5 @@
+/!\FINISH possible_moves.c add_move -> add_move_if_not_threatening_king /!\
+
 possible moves:
     captures
     check:
@@ -18,6 +20,7 @@ set player side
 
 advantage indicator
 
+C:\Users\daYutu\AppData\Local\Programs\Python\Python310-32\python
 
 free memory between py and c
 
@@ -47,7 +50,7 @@ int main()
 	return 0;
 }
 
-
+DEPENDENCY : Game.king_pos is not updated when king is moved atm, only updated when parsing fen_string
 
 
 
