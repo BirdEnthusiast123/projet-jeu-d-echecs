@@ -231,7 +231,7 @@ class Chess_board(tk.Canvas):
 		self.create_circle(x*SQUARE_SIZE + (SQUARE_SIZE/2), 
 						   y*SQUARE_SIZE + (SQUARE_SIZE/2), 
 						   SQUARE_SIZE/8, 
-						   fill="white",
+						   fill=HIGHLIGHT_THEME,
 						   outline="white")
 
 	def mouse_input_handler(self, eventorigin):

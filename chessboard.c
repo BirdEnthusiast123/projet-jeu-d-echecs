@@ -265,7 +265,7 @@ void print_board(Game *g)
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			printf("%d, \t", g->board[i][j]);
+			printf("%c, \t", PRINT_STR[g->board[i][j]]);
 		}
 		printf("\n");
 	}

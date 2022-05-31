@@ -16,6 +16,8 @@
  */
 #define MOVE_LIST_BUFFER_SIZE 8
 
+#define PRINT_STR " NQKRBP qkrbpn  _"
+
 /**
  * \enum Piece
  * \brief Representation of chess pieces and emptiness

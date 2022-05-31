@@ -264,7 +264,7 @@ void fill_capture_list_king(int x, int y, Move_list *ml)
 			for (int j = -1; j <= 1; j++)
 			{
 				tmp_y = y + j;
-				if((tmp_y >= 0) && (tmp_y <= 7) && (tmp_x != 0 && tmp_y != 0))
+				if((tmp_y >= 0) && (tmp_y <= 7) && (i != 0 || j != 0))
 				{
 					add_move(ml, tmp_x, tmp_y);
 				}
@@ -279,6 +279,8 @@ void fill_capture_list_king(int x, int y, Move_list *ml)
  */
 void fill_capture_list(Game *g, int x, int y, Move_list *ml)
 {
+	if(x == -1)
+		return;
 	switch (g->board[y][x])
 	{
     case W_PAWN:
@@ -310,7 +312,6 @@ void fill_capture_list(Game *g, int x, int y, Move_list *ml)
 	default:
 		break;
 	}
-	//print_move_list(ml);
 }
 
 void fill_threatmap(Game* g)
@@ -324,7 +325,6 @@ void fill_threatmap(Game* g)
     }
 
     Move_list *ml = init_move_list();
-	printf("here fill_threatmap enemy pieces count = %d\n", g->enemy_pieces_count);
 
     for (int i = 0; i < g->enemy_pieces_count; i++)
     {
@@ -356,6 +356,7 @@ void print_threatmap(Game* g)
 int is_king_threatened(Game* g)
 {
     fill_threatmap(g);
+	print_threatmap(g);
     return g->threatmap[g->king_pos.x][g->king_pos.y];
 }
 

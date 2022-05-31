@@ -59,6 +59,7 @@ void add_move_if_not_threatening_king
 )
 {
 	Piece tmp_p = g->board[new_y][new_x];
+	int tmp_x, tmp_y, i = -1;
 
 	g->board[new_y][new_x] = p;
 	g->board[y][x] = EMPTY;
@@ -66,8 +67,38 @@ void add_move_if_not_threatening_king
 	printf("here addmove\n");
 	print_game(g);
 
+	// temporary removal of the captured piece in the enemy_pieces list
+	if
+	(
+		(g->bool_is_black && is_white(tmp_p)) ||
+		(!(g->bool_is_black) && is_black(tmp_p))
+	)
+	{
+		i = 0;
+		while(i < g->enemy_pieces_count)
+		{
+			if((g->enemy_pieces[i].y == new_x) && (g->enemy_pieces[i].x == new_y))
+			{
+				tmp_x = g->enemy_pieces[i].x;
+				tmp_y = g->enemy_pieces[i].y;
+
+				g->enemy_pieces[i].x = -1;
+				g->enemy_pieces[i].y = -1;
+
+				break;
+			}
+			i++;
+		}
+	}
+
 	if(is_king_threatened(g) == 0)
 		add_move(ml, new_x, new_y);
+
+	if(i != -1)
+	{
+		g->enemy_pieces[i].x = tmp_x;
+		g->enemy_pieces[i].y = tmp_y;
+	}
 	
 	g->board[new_y][new_x] = tmp_p;
 	g->board[y][x] = p;
@@ -396,7 +427,7 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 				(
 					(tmp_y >= 0) &&
 					(tmp_y <= 7) &&
-					(!is_black(get_piece(g, tmp_x, tmp_y)))
+					(!(is_black(get_piece(g, tmp_x, tmp_y))))
 				)
 				{
 					int x_mem = g->king_pos.x, y_mem = g->king_pos.y;
