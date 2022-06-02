@@ -106,7 +106,7 @@ void fill_capture_list_rook(Game *g, int x, int y, Move_list *ml)
 }
 
 
-void fill_capture_list_knight(Game *g, int x, int y, Move_list *ml)
+void fill_capture_list_knight(int x, int y, Move_list *ml)
 {
 	int tmp_x = x - 2;
 	int tmp_y;
@@ -295,7 +295,7 @@ void fill_capture_list(Game *g, int x, int y, Move_list *ml)
 		break;
     case W_KNIGHT:
 	case B_KNIGHT:
-		fill_capture_list_knight(g, x, y, ml);
+		fill_capture_list_knight(x, y, ml);
 		break;
     case W_BISHOP:
 	case B_BISHOP:
@@ -357,37 +357,4 @@ int is_king_threatened(Game* g)
 {
     fill_threatmap(g);
     return g->threatmap[g->king_pos.x][g->king_pos.y];
-}
-
-int main()
-{
-	Game g;
-
-	init_game_board(&g);
-
-	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-    char* fen2 = "rnb1kbnr/pppp1ppp/8/4p3/4q3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
-	parse_fen_string(&g, fen2);
-	print_game(&g);
-
-    for (int i = 0; i < g.enemy_pieces_count; i++)
-    {
-        printf("x = %d, y = %d\n", g.enemy_pieces[i].x, g.enemy_pieces[i].y);
-    }
-
-    Move_list* ml = init_move_list();
-    fill_capture_list(&g, 3, 1, ml);
-    print_move_list(ml);
-    free_move_list(ml);
-    
-
-    fill_threatmap(&g);
-    print_threatmap(&g);
-    printf("threat = %d\n", is_king_threatened(&g));
-	
-
-	free_game_board(&g);
-
-
-	return 0;
 }

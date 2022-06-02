@@ -1,12 +1,7 @@
 /!\FINISH possible_moves.c add_move -> add_move_if_not_threatening_king /!\
 
 possible moves:
-    captures
-    check:
-        pin
-        castle
     promotion
-    en passant
 
 detect checkmate
     king moves
@@ -16,13 +11,9 @@ detect checkmate
 
 ia
 
-set player side
-
 advantage indicator
 
 C:\Users\daYutu\AppData\Local\Programs\Python\Python310-32\python
-
-free memory between py and c
 
 atm board is initialized everytime moves are computed,
 could store board and fen string in memory and strcmp 
@@ -31,34 +22,35 @@ the input fen string with stored string
 
 int main()
 {
-	printf("hey\n");
-
 	Game g;
 
 	init_game_board(&g);
 
-	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0";
-	parse_fen_string(&g, fen);
+	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+    char* fen2 = "rnb1kbnr/pppp1ppp/8/4p3/4q3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+	parse_fen_string(&g, fen2);
 	print_game(&g);
+
+    for (int i = 0; i < g.enemy_pieces_count; i++)
+    {
+        printf("x = %d, y = %d\n", g.enemy_pieces[i].x, g.enemy_pieces[i].y);
+    }
+
+    Move_list* ml = init_move_list();
+    fill_capture_list(&g, 3, 1, ml);
+    print_move_list(ml);
+    free_move_list(ml);
+    
+
+    fill_threatmap(&g);
+    print_threatmap(&g);
+    printf("threat = %d\n", is_king_threatened(&g));
 	
 
 	free_game_board(&g);
-	
-	Test* t = wrap_possible_moves("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 0 KQkq - 0 0", 4, 2);
-	printf("%d %d\n", t->arr[0], t->arr[1]);
+
 
 	return 0;
 }
 
 DEPENDENCY : Game.king_pos is not updated when king is moved atm, only updated when parsing fen_string
-
-
-
-test for checks (supposed both kings cant be in check at once):
-	do move
-	make sure king is not threatened:
-		threatmap is copy of game :
-			n == 0 means safe
-			n > 0  means threatened by n foes
-		computed by checking all of oponents possible moves:
-			keep track of oponents pieces coordinates at the moment of the fen string parse
