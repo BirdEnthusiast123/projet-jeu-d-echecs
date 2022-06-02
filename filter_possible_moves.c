@@ -356,14 +356,11 @@ void print_threatmap(Game* g)
 int is_king_threatened(Game* g)
 {
     fill_threatmap(g);
-	print_threatmap(g);
     return g->threatmap[g->king_pos.x][g->king_pos.y];
 }
 
 int main()
 {
-	printf("hey\n");
-
 	Game g;
 
 	init_game_board(&g);

@@ -64,9 +64,6 @@ void add_move_if_not_threatening_king
 	g->board[new_y][new_x] = p;
 	g->board[y][x] = EMPTY;
 
-	printf("here addmove\n");
-	print_game(g);
-
 	// temporary removal of the captured piece in the enemy_pieces list
 	if
 	(
@@ -440,6 +437,37 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 			}
 		}
 	}
+
+	fill_threatmap(g);
+
+	//kingside castle
+	if
+	(
+		(g->castles & B_KINGSIDE_CASTLE)&&
+		(is_empty(g->board[0][6]))&&
+		(is_empty(g->board[0][5]))&&
+		(g->threatmap[0][6] == 0)&&
+		(g->threatmap[0][5] == 0)&&
+		(g->threatmap[0][4] == 0)
+	)
+	{
+		add_move(ml, 6, 0);
+	}
+
+	//queenside castle
+	if
+	(
+		(g->castles & B_QUEENSIDE_CASTLE)&&
+		(is_empty(g->board[0][1]))&&
+		(is_empty(g->board[0][2]))&&
+		(is_empty(g->board[0][3]))&&
+		(g->threatmap[0][2] == 0)&&
+		(g->threatmap[0][3] == 0)&&
+		(g->threatmap[0][4] == 0)
+	)
+	{
+		add_move(ml, 2, 0);
+	}
 }
 
 // post: check for promotion
@@ -772,6 +800,37 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 			}
 		}
 	}
+
+	fill_threatmap(g);
+
+	//kingside castle
+	if
+	(
+		(g->castles & W_KINGSIDE_CASTLE)&&
+		(is_empty(g->board[7][6]))&&
+		(is_empty(g->board[7][5]))&&
+		(g->threatmap[7][6] == 0)&&
+		(g->threatmap[7][5] == 0)&&
+		(g->threatmap[7][4] == 0)
+	)
+	{
+		add_move(ml, 6, 7);
+	}
+
+	//queenside castle
+	if
+	(
+		(g->castles & W_QUEENSIDE_CASTLE)&&
+		(is_empty(g->board[7][1]))&&
+		(is_empty(g->board[7][2]))&&
+		(is_empty(g->board[7][3]))&&
+		(g->threatmap[7][2] == 0)&&
+		(g->threatmap[7][3] == 0)&&
+		(g->threatmap[7][4] == 0)
+	)
+	{
+		add_move(ml, 2, 7);
+	}
 }
 
 /** \brief Fills the array of a Move_list struct
@@ -821,7 +880,6 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 	default:
 		break;
 	}
-	// print_move_list(ml);
 }
 
 /** \brief Initializes and fills the array of a Move_list struct
