@@ -889,14 +889,13 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 Move_list *possible_moves(char *fen, int x, int y)
 {
 	Game g;
-	init_game_board(&g);
+	g.enemy_pieces_count = 0;
 	parse_fen_string(&g, fen);
 
 	Move_list *res = init_move_list();
 
 	fill_move_list(&g, x, y, res);
 
-	free_game_board(&g);
 	return res;
 }
 

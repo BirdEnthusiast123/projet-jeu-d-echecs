@@ -198,7 +198,6 @@ class Promotion_window(tk.Toplevel):
         promo_canvas.create_image(40 + 1 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[1]])
         promo_canvas.create_image(40 + 2 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[2]])
         promo_canvas.create_image(40 + 3 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[3]])
-        self.grab_set()
 
     def mouse_input_handler_promotion(self, eventorigin):
         x = eventorigin.x // SQUARE_SIZE
@@ -271,8 +270,6 @@ class Chess_board(tk.Canvas):
                            outline="black")
 
     def mouse_input_handler(self, eventorigin):
-        if isinstance(eventorigin.widget,tk.Tk):
-            return
         new_x = eventorigin.x // SQUARE_SIZE
         new_y = eventorigin.y // SQUARE_SIZE
 
@@ -392,9 +389,10 @@ class Chess_board(tk.Canvas):
         self.draw_piece(self.mouse_input_x, self.mouse_input_y)
         if(self.ml.nb != 0):
             for i in range(0, self.ml.nb, 2):
-                self.draw_square(self.ml.array[i], self.ml.array[i+1])
-                self.draw_piece(self.ml.array[i], self.ml.array[i+1])
-            lib.free_move_list(ct.byref(self.ml))
+            	if(self.ml.array[i] >= 0 and self.ml.array[i] <= 7 and \
+            		self.ml.array[i+1] >= 0 and self.ml.array[i+1] <= 7):
+	                self.draw_square(self.ml.array[i], self.ml.array[i+1])
+	                self.draw_piece(self.ml.array[i], self.ml.array[i+1])
             self.ml.nb = 0
 
         # highlight current and possible squares
@@ -409,8 +407,7 @@ class Chess_board(tk.Canvas):
             self.ml = Move_list.from_address(lib.possible_moves(
                 self.game.fen.encode(), self.mouse_input_x, self.mouse_input_y))
             for i in range(0, self.ml.nb, 2):
-                self.highlight_possible_move(
-                    self.ml.array[i], self.ml.array[i+1])
+                self.highlight_possible_move(self.ml.array[i], self.ml.array[i+1])
 
 
 def main():

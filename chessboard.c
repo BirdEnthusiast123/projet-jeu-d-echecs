@@ -46,34 +46,6 @@ int skip_spaces_string(char *str, int i)
 /* struct Game related functions */
 
 /**
- * \brief Allocates the necessary memory for a Game struct
- *
- * \post Free the allocated memory with the \c free_game_board function
- */
-void init_game_board(Game *g)
-{
-	g->board = malloc(8 * sizeof *g->board);
-	for (int i = 0; i < 8; i++)
-	{
-		g->board[i] = malloc(8 * sizeof *g->board[i]);
-	}
-
-	g->enemy_pieces_count = 0;
-}
-
-/**
- * \brief Frees the memory allocated by a Game struct
- */
-void free_game_board(Game *g)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		free(g->board[i]);
-	}
-	free(g->board);
-}
-
-/**
  * \brief Fills the Game's struct board at coordinates \c x, \c y
  * in regards to the FEN chess notation associated with the
  * parsed character

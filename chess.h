@@ -65,7 +65,7 @@ typedef struct
  */
 typedef struct
 {
-	Piece **board;
+	Piece board[8][8];
 	int bool_is_black;
 	int castles;
 	Position en_pass;
