@@ -30,7 +30,7 @@ B_PAWN = 12
 B_KNIGHT = 13
 
 BASE_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-TEST_FEN = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 20 21"
+TEST_FEN = "rnbqkbnr/ppPp3p/8/4ppp1/8/8/PPP1PPPP/RNBQKBNR b KQkq - 7 8"
 
 # Some function calls throw an error if the Tkinter environment is not initialized
 # such as the following images being loaded
@@ -180,20 +180,41 @@ class Game:
         self.fen = copy.copy(res)
         print(self.fen)
 
-    def move_is_castle():
-        pass
-
 # Canvas, graphic interface
+
+class Promotion_window(tk.Toplevel):
+    def __init__(self, rt, bool_is_black=True, wdth=str(4 * SQUARE_SIZE), hght=str(SQUARE_SIZE)):
+        super().__init__(rt, width=wdth, height=hght)
+        self.piece = EMPTY
+
+        self.bind("<Button 1>", self.mouse_input_handler_promotion, add='+')
+
+        promo_canvas = tk.Canvas(self, width=wdth, height=hght)
+        promo_canvas.pack()
+
+        self.promo = [B_QUEEN, B_KNIGHT, B_BISHOP, B_ROOK] if bool_is_black\
+                    else [W_QUEEN, W_KNIGHT, W_BISHOP, W_ROOK]
+        promo_canvas.create_image(40, 45, image=dict_piece_img[self.promo[0]])
+        promo_canvas.create_image(40 + 1 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[1]])
+        promo_canvas.create_image(40 + 2 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[2]])
+        promo_canvas.create_image(40 + 3 * SQUARE_SIZE, 45, image=dict_piece_img[self.promo[3]])
+        self.grab_set()
+
+    def mouse_input_handler_promotion(self, eventorigin):
+        x = eventorigin.x // SQUARE_SIZE
+        self.piece = self.promo[x]
+        self.destroy()
 
 
 class Chess_board(tk.Canvas):
-    def __init__(self, root, wdth, hght, game):
-        super().__init__(root, width=wdth, height=hght)
+    def __init__(self, rt, wdth, hght, game):
+        super().__init__(rt, width=wdth, height=hght)
         self.setup_grid()
         self.game = game
         self.mouse_input_x = 0
         self.mouse_input_y = 0
         self.ml = Move_list()
+        self.promotion = EMPTY
 
     def setup_grid(self):
         self.create_rectangle(0, 0,
@@ -250,6 +271,8 @@ class Chess_board(tk.Canvas):
                            outline="black")
 
     def mouse_input_handler(self, eventorigin):
+        if isinstance(eventorigin.widget,tk.Tk):
+            return
         new_x = eventorigin.x // SQUARE_SIZE
         new_y = eventorigin.y // SQUARE_SIZE
 
@@ -269,8 +292,9 @@ class Chess_board(tk.Canvas):
                             self.game.grid[0][7] = EMPTY
                         self.game.castles = self.game.castles.replace('k', '')
                         self.game.castles = self.game.castles.replace('q', '')
-                        self.game.castles = "-" if (self.game.castles == "") else self.game.castles
-                    
+                        self.game.castles = "-" if (self.game.castles == "") \
+                                                else self.game.castles
+
                     # whiteside castles
                     if(piece == W_KING):
                         if((self.mouse_input_x - new_x) == 2):
@@ -281,39 +305,72 @@ class Chess_board(tk.Canvas):
                             self.game.grid[7][7] = EMPTY
                         self.game.castles = self.game.castles.replace('K', '')
                         self.game.castles = self.game.castles.replace('Q', '')
-                        self.game.castles = "-" if (self.game.castles == "") else self.game.castles
-                    
+                        self.game.castles = "-" if (self.game.castles == "") \
+                                                else self.game.castles
+
                     # black rook moves => no castles on that side
                     if(piece == B_ROOK):
                         if(self.mouse_input_x == 0):
-                            self.game.castles = self.game.castles.replace('q', '')
-                            self.game.castles = "-" if (self.game.castles == "") else self.game.castles
+                            self.game.castles = self.game.castles.replace(
+                                'q', '')
+                            self.game.castles = "-" if (self.game.castles == "") \
+                                                    else self.game.castles
                         if(self.mouse_input_x == 7):
                             self.game.castles = self.game.castles.replace('k', '')
-                            self.game.castles = "-" if (self.game.castles == "") else self.game.castles
+                            self.game.castles = "-" if (self.game.castles == "") \
+                                                    else self.game.castles
 
                     # white rook moves => no castles on that side
                     if(piece == W_ROOK):
                         if(self.mouse_input_x == 0):
-                            self.game.castles = self.game.castles.replace('Q', '')
-                            self.game.castles = "-" if (self.game.castles == "") else self.game.castles
+                            self.game.castles = self.game.castles.replace(
+                                'Q', '')
+                            self.game.castles = "-" if (self.game.castles == "") \
+                                                    else self.game.castles
                         if(self.mouse_input_x == 7):
                             self.game.castles = self.game.castles.replace('K', '')
-                            self.game.castles = "-" if (self.game.castles == "") else self.game.castles
-                    
+                            self.game.castles = "-" if (self.game.castles == "") \
+                                                    else self.game.castles
+
                     # en passant fen string update and capture board update
                     if(piece == B_PAWN):
+                        # update en passant coordinates in fen string
                         if((new_y - self.mouse_input_y) == 2):
                             self.game.en_passant = chr(ord('a') + new_x) + str(8 - (new_y - 1))
-                        if(self.mouse_input_x != new_x):
-                            self.game.grid[new_y - 1][new_x] = EMPTY
+                        # en passant : remove captured piece
+                        if(self.game.fen.split(' ')[3][0] != '-'):
+                            en_pass_str = self.game.fen.split(' ')[3]
+                            en_pass_x = ord(en_pass_str[0]) - ord('a')
+                            en_pass_y = 8 - int(en_pass_str[1])
+                            if((new_x == en_pass_x) and (new_y == en_pass_y)):
+                                self.game.grid[new_y - 1][new_x] = EMPTY
+                        # promotion
+                        if(new_y == 7):
+                            promotion = Promotion_window(root, bool_is_black=True)
+                            root.wait_window(promotion)
+                            # dependency below, thankfully promotion is the only move
+                            # changing the quality of a piece
+                            piece = promotion.piece
 
                     if(piece == W_PAWN):
+                        # update en passant coordinates in fen string
                         if((self.mouse_input_y - new_y) == 2):
                             self.game.en_passant = chr(ord('a') + new_x) + str(8 - (new_y + 1))
-                        if(self.mouse_input_x != new_x):
-                            self.game.grid[new_y + 1][new_x] = EMPTY
-                    
+                        # en passant : remove captured piece
+                        if(self.game.fen.split(' ')[3][0] != '-'):
+                            en_pass_str = self.game.fen.split(' ')[3]
+                            en_pass_x = ord(en_pass_str[0]) - ord('a')
+                            en_pass_y = 8 - int(en_pass_str[1])
+                            if((new_x == en_pass_x) and (new_y == en_pass_y)):
+                                self.game.grid[new_y + 1][new_x] = EMPTY
+                        # promotion
+                        if(new_y == 0):
+                            promotion = Promotion_window(root, bool_is_black=False)
+                            root.wait_window(promotion)
+                            # dependency below, thankfully promotion is the only move
+                            # changing the quality of a piece
+                            piece = promotion.piece
+
                     self.game.grid[new_y][new_x] = piece
                     self.game.grid[self.mouse_input_y][self.mouse_input_x] = EMPTY
 
@@ -341,8 +398,8 @@ class Chess_board(tk.Canvas):
             self.ml.nb = 0
 
         # highlight current and possible squares
-        self.mouse_input_x = new_x
-        self.mouse_input_y = new_y
+        self.mouse_input_x = new_x if ((new_x >= 0) and (new_x <= 7)) else 0
+        self.mouse_input_y = new_y if ((new_y >= 0) and (new_y <= 7)) else 0
         self.highlight_square(self.mouse_input_x, self.mouse_input_y)
         self.draw_piece(self.mouse_input_x, self.mouse_input_y)
 
@@ -362,7 +419,7 @@ def main():
     ex = Chess_board(root, str(TOTAL_SIZE), str(TOTAL_SIZE), game)
     ex.pack()
 
-    root.bind("<Button 1>", ex.mouse_input_handler)
+    root.bind("<Button 1>", ex.mouse_input_handler, add='+')
 
     ex.draw_pieces()
     root.mainloop()

@@ -1,13 +1,11 @@
-/!\FINISH possible_moves.c add_move -> add_move_if_not_threatening_king /!\
-
-possible moves:
-    promotion
+/!\ bug : root window crashes if put in background /!\
 
 detect checkmate
     king moves
     block w other piece
     capture checking piece
-    detect stalemate/draw if no legal move
+
+detect stalemate/draw if no legal move
 
 ia
 
