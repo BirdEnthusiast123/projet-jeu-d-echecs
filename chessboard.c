@@ -125,6 +125,12 @@ void parse_fen_char_pieces(Game *g, char c, int x, int *y)
 			g->enemy_pieces[g->enemy_pieces_count].y = *y;
 			g->enemy_pieces_count++;
 		}
+		else if(!(is_empty(g->board[x][*y])))
+		{
+			g->ally_pieces[g->ally_pieces_count].x = x;
+			g->ally_pieces[g->ally_pieces_count].y = *y;
+			g->ally_pieces_count++;
+		}
 
 		*y += 1;
 	}
@@ -161,6 +167,10 @@ void parse_fen_string_pieces(Game *g, char *fen_string)
 void parse_fen_string(Game *g, char *fen_string)
 {
 	int i = 0;
+
+	// players pieces
+	g->enemy_pieces_count = 0;
+	g->ally_pieces_count = 0;
 
 	// pieces
 	while (fen_string[i] != ' ')
@@ -229,6 +239,15 @@ void parse_fen_string(Game *g, char *fen_string)
 
 	// full moves
 	g->full_moves_count = parse_int_string(&(fen_string[i]));
+
+	// check if game ended in draw or checkmate
+	if(!(player_can_move(g)))
+	{
+		if(is_king_threatened(g))
+			printf("Checkmated \n");
+		else
+			printf("Draw / Stalemate\n");
+	}
 }
 
 void print_board(Game *g)
@@ -257,6 +276,11 @@ void print_game(Game *g)
 		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
 	}
 	printf("\n");
+	for (int i = 0; i < g->ally_pieces_count; i++)
+	{
+		printf("x = %d, y = %d\t", g->ally_pieces[i].x, g->ally_pieces[i].y);
+	}
+	printf("\n");
 	printf("king : x = %d, y = %d \n", g->king_pos.x, g->king_pos.y);
 }
 
@@ -279,3 +303,5 @@ int is_empty(Piece p)
 {
 	return (p == EMPTY);
 }
+
+

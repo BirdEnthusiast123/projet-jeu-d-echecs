@@ -75,6 +75,9 @@ typedef struct
 	int enemy_pieces_count;
 	Position enemy_pieces[16];
 
+	int ally_pieces_count;
+	Position ally_pieces[16];
+
 	int threatmap[8][8];
 
 	Position king_pos;	
@@ -118,22 +121,11 @@ typedef struct
 // possible_moves.c functions
 Move_list *init_move_list();
 void add_move(Move_list *ml, int x, int y);
-void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_black_rook(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_black_knight(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_black_bishop(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_black_queen(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_rook(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_knight(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_bishop(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml);
-void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml);
 void fill_move_list(Game *g, int x, int y, Move_list *ml);
 Move_list *possible_moves(char *fen, int x, int y);
 void free_move_list(Move_list *ml);
 void print_move_list(Move_list *ml);
+int player_can_move(Game* g);
 
 // filter_possible_moves.c functions
 void fill_threatmap(Game* g);

@@ -30,7 +30,7 @@ B_PAWN = 12
 B_KNIGHT = 13
 
 BASE_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-TEST_FEN = "rnbqkbnr/ppPp3p/8/4ppp1/8/8/PPP1PPPP/RNBQKBNR b KQkq - 7 8"
+TEST_FEN = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq - 7 8"
 
 # Some function calls throw an error if the Tkinter environment is not initialized
 # such as the following images being loaded

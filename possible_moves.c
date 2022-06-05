@@ -889,7 +889,6 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 Move_list *possible_moves(char *fen, int x, int y)
 {
 	Game g;
-	g.enemy_pieces_count = 0;
 	parse_fen_string(&g, fen);
 
 	Move_list *res = init_move_list();
@@ -899,7 +898,17 @@ Move_list *possible_moves(char *fen, int x, int y)
 	return res;
 }
 
-/*
-fonction créant l'intégralité de la threatmap
-fonction qui, en créant la threatmap, teste si une coordonnée est ajoutée à la map
-*/
+int player_can_move(Game* g)
+{
+	Move_list *ml = init_move_list();
+
+    for (int i = 0; i < g->ally_pieces_count; i++)
+    {
+        fill_move_list(g, g->ally_pieces[i].y, g->ally_pieces[i].x, ml);
+        if(ml->nb != 0) return 1;
+        ml->nb = 0;
+    }
+
+	free_move_list(ml);
+	return 0;
+}
