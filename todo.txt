@@ -1,17 +1,12 @@
-/!\ bug : root window crashes if put in background /!\
+/!\ bug : root window crashes if put in background (windows 10 only, could be threading, no idea really) /!\
 
-detect checkmate
-    king moves
-    block w other piece
-    capture checking piece
 
-detect stalemate/draw if no legal move
-
-ia
+ia :
+    value of a position
+    all possible moves -> fen strings of resulting board
 
 advantage indicator
 
-C:\Users\daYutu\AppData\Local\Programs\Python\Python310-32\python
 
 atm board is initialized everytime moves are computed,
 could store board and fen string in memory and strcmp 
@@ -28,21 +23,6 @@ int main()
     char* fen2 = "rnb1kbnr/pppp1ppp/8/4p3/4q3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
 	parse_fen_string(&g, fen2);
 	print_game(&g);
-
-    for (int i = 0; i < g.enemy_pieces_count; i++)
-    {
-        printf("x = %d, y = %d\n", g.enemy_pieces[i].x, g.enemy_pieces[i].y);
-    }
-
-    Move_list* ml = init_move_list();
-    fill_capture_list(&g, 3, 1, ml);
-    print_move_list(ml);
-    free_move_list(ml);
-    
-
-    fill_threatmap(&g);
-    print_threatmap(&g);
-    printf("threat = %d\n", is_king_threatened(&g));
 	
 
 	free_game_board(&g);
@@ -51,4 +31,3 @@ int main()
 	return 0;
 }
 
-DEPENDENCY : Game.king_pos is not updated when king is moved atm, only updated when parsing fen_string
