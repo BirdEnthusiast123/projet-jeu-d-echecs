@@ -82,11 +82,8 @@ void parse_fen_char_pieces(Game *g, char c, int x, int *y)
 				break;
 			case 'k':
 				g->board[x][*y] = B_KING;
-				if(g->bool_is_black)
-				{
-					g->king_pos.x = x;
-					g->king_pos.y = *y;
-				}
+				g->black_king_pos.x = x;
+				g->black_king_pos.y = *y;
 				break;
 			case 'P':
 				g->board[x][*y] = W_PAWN;
@@ -105,11 +102,8 @@ void parse_fen_char_pieces(Game *g, char c, int x, int *y)
 				break;
 			case 'K':
 				g->board[x][*y] = W_KING;
-				if(!(g->bool_is_black))
-				{
-					g->king_pos.x = x;
-					g->king_pos.y = *y;
-				}
+				g->white_king_pos.x = x;
+				g->white_king_pos.y = *y;
 				break;
 			default:
 				break;
@@ -243,7 +237,9 @@ void parse_fen_string(Game *g, char *fen_string)
 	// check if game ended in draw or checkmate
 	if(!(player_can_move(g)))
 	{
-		if(is_king_threatened(g))
+		if(g->bool_is_black && is_black_king_threatened(g))
+			printf("Checkmated \n");
+		else if (!(g->bool_is_black) && is_white_king_threatened(g))
 			printf("Checkmated \n");
 		else
 			printf("Draw / Stalemate\n");
@@ -276,12 +272,14 @@ void print_game(Game *g)
 		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
 	}
 	printf("\n");
+	printf("ally pieces count : %d\n", g->ally_pieces_count);
 	for (int i = 0; i < g->ally_pieces_count; i++)
 	{
 		printf("x = %d, y = %d\t", g->ally_pieces[i].x, g->ally_pieces[i].y);
 	}
 	printf("\n");
-	printf("king : x = %d, y = %d \n", g->king_pos.x, g->king_pos.y);
+	printf("black king : x = %d, y = %d \n", g->black_king_pos.x, g->black_king_pos.y);
+	printf("white king : x = %d, y = %d \n", g->white_king_pos.x, g->white_king_pos.y);
 }
 
 Piece get_piece(Game *g, int x, int y)

@@ -326,15 +326,32 @@ void fill_threatmap(Game* g)
 
     Move_list *ml = init_move_list();
 
-    for (int i = 0; i < g->enemy_pieces_count; i++)
-    {
-        fill_capture_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
-        for (int j = 0; j < ml->nb; j += 2)
-        {
-            g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
-        }
-        ml->nb = 0;
-    }
+	if(g->bool_is_black)
+	{
+		for (int i = 0; i < g->enemy_pieces_count; i++)
+		{
+			fill_capture_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
+			for (int j = 0; j < ml->nb; j += 2)
+			{
+				g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
+			}
+			ml->nb = 0;
+		}
+	}
+	else
+	{
+		for (int i = 0; i < g->ally_pieces_count; i++)
+		{
+			fill_capture_list(g, g->ally_pieces[i].y, g->ally_pieces[i].x, ml);
+			for (int j = 0; j < ml->nb; j += 2)
+			{
+				g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
+			}
+			ml->nb = 0;
+		}
+	}
+
+		
 
 	free_move_list(ml);
 }
@@ -353,8 +370,14 @@ void print_threatmap(Game* g)
 }
 
 // returns n = 0 if not threatened, n > 0 if threatened
-int is_king_threatened(Game* g)
+int is_black_king_threatened(Game* g)
 {
     fill_threatmap(g);
-    return g->threatmap[g->king_pos.x][g->king_pos.y];
+    return g->threatmap[g->black_king_pos.x][g->black_king_pos.y];
+}
+
+int is_white_king_threatened(Game* g)
+{
+    fill_threatmap(g);
+    return g->threatmap[g->white_king_pos.x][g->white_king_pos.y];
 }

@@ -6,9 +6,9 @@ else
 	RM = rm
 endif
 
-EXEC_FILE = chessboard possible_moves filter_possible_moves
-OBJECTS = chessboard.o possible_moves.o filter_possible_moves.o
-SOURCES = chessboard.c possible_moves.c filter_possible_moves.c
+EXEC_FILE = chessboard possible_moves filter_possible_moves ai
+OBJECTS = chessboard.o possible_moves.o filter_possible_moves.o ai.o
+SOURCES = chessboard.c possible_moves.c filter_possible_moves.c ai.c
 
 CC = gcc
 
@@ -22,7 +22,7 @@ $(OBJECTS): %.o: %.c
 
 $(EXEC_FILE): $(OBJECTS)
 	$(CC) $^ -o $@ 
-
+	
 clean:
 	$(RM) -f $(EXEC_FILE) *.o *.so *.exe
 

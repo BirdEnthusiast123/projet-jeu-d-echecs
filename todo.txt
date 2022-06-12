@@ -17,16 +17,11 @@ int main()
 {
 	Game g;
 
-	init_game_board(&g);
-
 	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
     char* fen2 = "rnb1kbnr/pppp1ppp/8/4p3/4q3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
 	parse_fen_string(&g, fen2);
 	print_game(&g);
 	
-
-	free_game_board(&g);
-
 
 	return 0;
 }

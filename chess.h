@@ -40,16 +40,6 @@ typedef enum
 } Piece;
 
 /**
- * \enum Player
- * \brief Representation of players
- */
-typedef enum
-{
-	black = 'b',
-	white = 'w'
-} Player;
-
-/**
  * \struct Position
  * \brief Representation of a chess position
  */
@@ -80,10 +70,11 @@ typedef struct
 
 	int threatmap[8][8];
 
-	Position king_pos;	
+	Position black_king_pos;
+	Position white_king_pos;
 } Game;
 
-// chessboard.c functions
+// chessboard.c 
 int is_digit(char c);
 int parse_int_char(char c);
 int parse_int_string(char *str);
@@ -105,6 +96,8 @@ int is_black(Piece p);
 int is_white(Piece p);
 int is_empty(Piece p);
 
+// possible_moves.c
+
 /**
  * \struct Position
  * \brief Representation of a list of chess moves possible for
@@ -118,7 +111,6 @@ typedef struct
 	int *arr;
 } Move_list;
 
-// possible_moves.c functions
 Move_list *init_move_list();
 void add_move(Move_list *ml, int x, int y);
 void fill_move_list(Game *g, int x, int y, Move_list *ml);
@@ -127,6 +119,19 @@ void free_move_list(Move_list *ml);
 void print_move_list(Move_list *ml);
 int player_can_move(Game* g);
 
-// filter_possible_moves.c functions
+// filter_possible_moves.c 
 void fill_threatmap(Game* g);
-int is_king_threatened(Game* g);
+int is_black_king_threatened(Game* g);
+int is_white_king_threatened(Game* g);
+
+// ai.c
+typedef struct 
+{
+	Piece p;
+	Position pos;
+	Move_list* ml;
+} Piece_and_moves;
+
+
+int enemy_player_can_move(Game* g);
+int ally_player_can_move(Game* g);

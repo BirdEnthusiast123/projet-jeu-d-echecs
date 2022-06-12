@@ -88,10 +88,12 @@ void add_move_if_not_threatening_king
 		}
 	}
 
-	if(is_king_threatened(g) == 0)
+	if((g->bool_is_black) && (is_black_king_threatened(g) == 0))
+		add_move(ml, new_x, new_y);
+	else if ((!(g->bool_is_black)) && (is_white_king_threatened(g) == 0))
 		add_move(ml, new_x, new_y);
 
-	if(i != -1)
+	if((i != -1) && (i != 16))
 	{
 		g->enemy_pieces[i].x = tmp_x;
 		g->enemy_pieces[i].y = tmp_y;
@@ -427,12 +429,12 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 					(!(is_black(get_piece(g, tmp_x, tmp_y))))
 				)
 				{
-					int x_mem = g->king_pos.x, y_mem = g->king_pos.y;
-					g->king_pos.x = tmp_y;
-					g->king_pos.y = tmp_x;
+					int x_mem = g->black_king_pos.x, y_mem = g->black_king_pos.y;
+					g->black_king_pos.x = tmp_y;
+					g->black_king_pos.y = tmp_x;
 					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KING);
-					g->king_pos.x = x_mem;
-					g->king_pos.y = y_mem;
+					g->black_king_pos.x = x_mem;
+					g->black_king_pos.y = y_mem;
 				}
 			}
 		}
@@ -790,12 +792,12 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 					(tmp_y <= 7) &&
 					((!is_white(get_piece(g, tmp_x, tmp_y)))))
 				{
-					int x_mem = g->king_pos.x, y_mem = g->king_pos.y;
-					g->king_pos.x = tmp_y;
-					g->king_pos.y = tmp_x;
+					int x_mem = g->white_king_pos.x, y_mem = g->white_king_pos.y;
+					g->white_king_pos.x = tmp_y;
+					g->white_king_pos.y = tmp_x;
 					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KING);
-					g->king_pos.x = x_mem;
-					g->king_pos.y = y_mem;
+					g->white_king_pos.x = x_mem;
+					g->white_king_pos.y = y_mem;
 				}
 			}
 		}
@@ -839,6 +841,8 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
  */
 void fill_move_list(Game *g, int x, int y, Move_list *ml)
 {
+	if(x == -1)
+		return;
 	switch (g->board[y][x])
 	{
 	case B_PAWN:
@@ -898,17 +902,47 @@ Move_list *possible_moves(char *fen, int x, int y)
 	return res;
 }
 
-int player_can_move(Game* g)
+int ally_player_can_move(Game* g)
 {
 	Move_list *ml = init_move_list();
 
     for (int i = 0; i < g->ally_pieces_count; i++)
     {
         fill_move_list(g, g->ally_pieces[i].y, g->ally_pieces[i].x, ml);
-        if(ml->nb != 0) return 1;
+        if(ml->nb != 0) 
+		{
+			free_move_list(ml);
+			return 1;
+		}
         ml->nb = 0;
     }
 
 	free_move_list(ml);
 	return 0;
 }
+
+int enemy_player_can_move(Game* g)
+{
+	Move_list *ml = init_move_list();
+
+	for (int i = 0; i < g->enemy_pieces_count; i++)
+	{
+		fill_move_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
+		if(ml->nb != 0) 
+		{
+			free_move_list(ml);
+			return 1;
+		}
+		ml->nb = 0;
+	}
+
+	free_move_list(ml);
+	return 0;
+}
+
+int player_can_move(Game* g)
+{
+	return ally_player_can_move(g) && enemy_player_can_move(g);
+}
+
+
