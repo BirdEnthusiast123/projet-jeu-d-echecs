@@ -88,9 +88,9 @@ void add_move_if_not_threatening_king
 		}
 	}
 
-	if((g->bool_is_black) && (is_black_king_threatened(g) == 0))
+	if(!(g->bool_is_black) && (is_black_king_threatened(g) == 0))
 		add_move(ml, new_x, new_y);
-	else if ((!(g->bool_is_black)) && (is_white_king_threatened(g) == 0))
+	else if (((g->bool_is_black)) && (is_white_king_threatened(g) == 0))
 		add_move(ml, new_x, new_y);
 
 	if((i != -1) && (i != 16))

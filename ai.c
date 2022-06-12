@@ -55,9 +55,9 @@ int evaluate_board(Game* g)
     return evaluation;
 }
 
-int minimax(Game* g, int depth)
+int minimax(Game* g, int depth, int* move)
 {
-    //printf("enemy : %d, ally : %d, depth : %d\n", ally_player_can_move(g), enemy_player_can_move(g), depth);
+    printf("enemy : %d, ally : %d, depth : %d\n", ally_player_can_move(g), enemy_player_can_move(g), depth);
     if ((depth == 0) || !(player_can_move(g)))
     {
         return evaluate_board(g);
@@ -183,8 +183,16 @@ int minimax(Game* g, int depth)
 
                 g->bool_is_black = 0;
 
-                int candidate = minimax(g, depth - 1);
-                max_value = (candidate > max_value)? candidate: max_value;
+                int candidate = minimax(g, depth - 1, move);
+                if(candidate > max_value)
+                {
+                    max_value = candidate;
+                    move[0] = pm.pos.x;
+                    move[1] = pm.pos.y;
+                    move[2] = new_x;
+                    move[3] = new_y;
+                    printf("%d, %d, %d, %d\n", move[0], move[1], move[2], move[3]);
+                }
 
                 g->bool_is_black = 1;
 
@@ -349,7 +357,7 @@ int minimax(Game* g, int depth)
 
                 g->bool_is_black = 1;
 
-                int candidate = minimax(g, depth - 1);
+                int candidate = minimax(g, depth - 1, move);
                 min_value = (candidate < min_value)? candidate: min_value;
 
                 g->bool_is_black = 0;
@@ -399,6 +407,32 @@ int minimax(Game* g, int depth)
         free_move_list(pm.ml);
         return min_value;
     }
+}
+
+typedef struct 
+{
+    int* arr;
+}Ai_move;
+
+Ai_move* ai_move(char* fen, int depth)
+{
+    Game g;
+    parse_fen_string(&g, fen);
+    print_game(&g);
+
+    Ai_move* am = malloc(sizeof(Ai_move));
+    am->arr = malloc(4 * sizeof(int));
+
+    minimax(&g, depth, am->arr);
+    printf("%d %d %d %d\n", am->arr[0], am->arr[1], am->arr[2], am->arr[3]);
+
+    return am;
+}
+
+void ai_move_free(Ai_move* am)
+{
+    free(am->arr);
+    free(am);
 }
 
 // int main()

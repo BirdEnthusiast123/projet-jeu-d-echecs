@@ -91,6 +91,7 @@ lib_path = "./shared.so"
 lib = ct.CDLL(lib_path)
 
 lib.possible_moves.restype = ct.c_void_p
+lib.ai_move.restype = ct.c_void_p
 
 
 class Move_list(ct.Structure):
@@ -100,6 +101,9 @@ class Move_list(ct.Structure):
 
     def __init__(self):
         self.nb = 0
+
+class Ai_move(ct.Structure):
+    _fields_ = [('array', ct.POINTER(ct.c_int))]
 
 # chess game representation
 
@@ -273,6 +277,127 @@ class Chess_board(tk.Canvas):
                            fill=HIGHLIGHT_THEME,
                            outline="black")
 
+    def ai_move(self):
+        # get move from c file as [x, y, new_x, new_y]
+        ai_move = Ai_move();
+        ai_move = Ai_move.from_address(lib.ai_move(self.game.fen.encode(), 4))
+        x = ai_move.array[0]
+        y = ai_move.array[1]
+        new_x = ai_move.array[2]
+        new_y = ai_move.array[3]
+        for x in range(4):
+            print(ai_move.array[x])
+
+        piece = self.game.grid[y][x]
+        if(piece == B_KING):
+            if((x - new_x) == 2):
+                self.game.grid[0][3] = self.game.grid[0][0]
+                self.game.grid[0][0] = EMPTY
+            if((x - new_x) == -2):
+                self.game.grid[0][5] = self.game.grid[0][7]
+                self.game.grid[0][7] = EMPTY
+            self.game.castles = self.game.castles.replace('k', '')
+            self.game.castles = self.game.castles.replace('q', '')
+            self.game.castles = "-" if (self.game.castles == "") \
+                else self.game.castles
+
+        # whiteside castles
+        if(piece == W_KING):
+            if((x - new_x) == 2):
+                self.game.grid[7][3] = self.game.grid[7][0]
+                self.game.grid[7][0] = EMPTY
+            if((x - new_x) == -2):
+                self.game.grid[7][5] = self.game.grid[7][7]
+                self.game.grid[7][7] = EMPTY
+            self.game.castles = self.game.castles.replace('K', '')
+            self.game.castles = self.game.castles.replace('Q', '')
+            self.game.castles = "-" if (self.game.castles == "") \
+                else self.game.castles
+
+        # black rook moves => no castles on that side
+        if(piece == B_ROOK):
+            if(x == 0):
+                self.game.castles = self.game.castles.replace(
+                    'q', '')
+                self.game.castles = "-" if (self.game.castles == "") \
+                    else self.game.castles
+            if(x == 7):
+                self.game.castles = self.game.castles.replace(
+                    'k', '')
+                self.game.castles = "-" if (self.game.castles == "") \
+                    else self.game.castles
+
+        # white rook moves => no castles on that side
+        if(piece == W_ROOK):
+            if(x == 0):
+                self.game.castles = self.game.castles.replace(
+                    'Q', '')
+                self.game.castles = "-" if (self.game.castles == "") \
+                    else self.game.castles
+            if(x == 7):
+                self.game.castles = self.game.castles.replace(
+                    'K', '')
+                self.game.castles = "-" if (self.game.castles == "") \
+                    else self.game.castles
+
+        # en passant fen string update and capture board update
+        if(piece == B_PAWN):
+            # update en passant coordinates in fen string
+            if((new_y - y) == 2):
+                self.game.en_passant = chr(
+                    ord('a') + new_x) + str(8 - (new_y - 1))
+            # en passant : remove captured piece
+            if(self.game.fen.split(' ')[3][0] != '-'):
+                en_pass_str = self.game.fen.split(' ')[3]
+                en_pass_x = ord(en_pass_str[0]) - ord('a')
+                en_pass_y = 8 - int(en_pass_str[1])
+                if((new_x == en_pass_x) and (new_y == en_pass_y)):
+                    self.game.grid[new_y - 1][new_x] = EMPTY
+            # promotion
+            if(new_y == 7):
+                promotion = Promotion_window(
+                    root, bool_is_black=True)
+                root.wait_window(promotion)
+                # dependency below, thankfully promotion is the only move
+                # changing the quality of a piece
+                piece = promotion.piece
+
+        if(piece == W_PAWN):
+            # update en passant coordinates in fen string
+            if((y - new_y) == 2):
+                self.game.en_passant = chr(
+                    ord('a') + new_x) + str(8 - (new_y + 1))
+            # en passant : remove captured piece
+            if(self.game.fen.split(' ')[3][0] != '-'):
+                en_pass_str = self.game.fen.split(' ')[3]
+                en_pass_x = ord(en_pass_str[0]) - ord('a')
+                en_pass_y = 8 - int(en_pass_str[1])
+                if((new_x == en_pass_x) and (new_y == en_pass_y)):
+                    self.game.grid[new_y + 1][new_x] = EMPTY
+            # promotion
+            if(new_y == 0):
+                promotion = Promotion_window(
+                    root, bool_is_black=False)
+                root.wait_window(promotion)
+                # dependency below, thankfully promotion is the only move
+                # changing the quality of a piece
+                piece = promotion.piece
+
+        self.game.grid[new_y][new_x] = piece
+        self.game.grid[y][x] = EMPTY
+
+        self.game.update_fen()
+        # reset en_passant
+        self.game.en_passant = '-'
+
+        self.delete("all")
+
+        self.setup_grid()
+        self.draw_pieces()
+
+        lib.ai_move_free(ai_move)
+        
+
     def mouse_input_handler(self, eventorigin):
         new_x = eventorigin.x // SQUARE_SIZE
         new_y = eventorigin.y // SQUARE_SIZE
@@ -392,6 +517,9 @@ class Chess_board(tk.Canvas):
 
                     lib.free_move_list(ct.byref(self.ml))
                     self.ml.nb = 0
+
+                    self.ai_move()
+
                     return
 
         # clean previous highlight
@@ -422,7 +550,7 @@ class Chess_board(tk.Canvas):
 
 
 def main():
-    game = Game(TEST_FEN)
+    game = Game(BASE_FEN)
 
     ex = Chess_board(root, str(TOTAL_SIZE), str(TOTAL_SIZE), game)
     ex.pack()

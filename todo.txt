@@ -1,9 +1,10 @@
 /!\ bug : root window crashes if put in background (windows 10 only, could be threading, no idea really) /!\
 
 
+buggy threatmaps, do one for each color and change functions in consequence
+
 ia :
-    value of a position
-    all possible moves -> fen strings of resulting board
+    alpha beta pruning
 
 advantage indicator
 
