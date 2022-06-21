@@ -6,9 +6,9 @@ else
 	RM = rm
 endif
 
-EXEC_FILE = chessboard possible_moves filter_possible_moves ai
-OBJECTS = chessboard.o possible_moves.o filter_possible_moves.o ai.o
-SOURCES = chessboard.c possible_moves.c filter_possible_moves.c ai.c
+EXEC_FILE = chessboard move_list possible_moves filter_possible_moves ai
+OBJECTS = chessboard.o move_list.o possible_moves.o filter_possible_moves.o ai.o
+SOURCES = chessboard.c move_list.c possible_moves.c filter_possible_moves.c ai.c
 
 CC = gcc
 
@@ -18,7 +18,7 @@ CC = gcc
 all: $(EXEC_FILE)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -fPIC $< $(CFLAGS)
+	$(CC) -O3 -fPIC $< $(CFLAGS)
 
 $(EXEC_FILE): $(OBJECTS)
 	$(CC) $^ -o $@ 
@@ -29,5 +29,5 @@ clean:
 lib: $(OBJECTS)
 	$(CC) -fPIC -shared -o shared.so $(OBJECTS)
 
-deploy:
+deploy: $(OBJECTS)
 	$(CC) -O3 -o $(EXEC_FILE) $(SOURCES)

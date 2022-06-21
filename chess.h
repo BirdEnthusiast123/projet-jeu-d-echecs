@@ -18,6 +18,8 @@
 
 #define PRINT_STR " NQKRBP qkrbpn  _"
 
+#define ARBITRARY_DEPTH 4
+
 /**
  * \enum Piece
  * \brief Representation of chess pieces and emptiness
@@ -52,6 +54,7 @@ typedef struct
 /**
  * \struct Game
  * \brief Representation of a chess game
+ * "black_threatmap" means the squares the black king can't access, same for white
  */
 typedef struct
 {
@@ -62,13 +65,14 @@ typedef struct
 	int half_moves_count;
 	int full_moves_count;
 
-	int enemy_pieces_count;
-	Position enemy_pieces[16];
+	int black_pieces_count;
+	Position black_pieces[16];
 
-	int ally_pieces_count;
-	Position ally_pieces[16];
+	int white_pieces_count;
+	Position white_pieces[16];
 
-	int threatmap[8][8];
+	int black_threatmap[8][8];
+    int white_threatmap[8][8];
 
 	Position black_king_pos;
 	Position white_king_pos;
@@ -83,7 +87,7 @@ int skip_spaces_string(char *str, int i);
 void init_game_board(Game *g);
 void free_game_board(Game *g);
 
-void parse_fen_char_pieces(Game *g, char c, int x, int *y);
+void parse_fen_char_pieces(Game *g, char c, int* x, int y);
 void parse_fen_string_pieces(Game *g, char *fen_string);
 void parse_fen_string(Game *g, char *fen_string);
 
@@ -91,6 +95,7 @@ void print_board(Game *g);
 void print_game(Game *g);
 
 Piece get_piece(Game *g, int x, int y);
+void set_piece(Game* g, int x, int y, Piece p);
 
 int is_black(Piece p);
 int is_white(Piece p);
@@ -117,10 +122,13 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml);
 Move_list *possible_moves(char *fen, int x, int y);
 void free_move_list(Move_list *ml);
 void print_move_list(Move_list *ml);
-int player_can_move(Game* g);
+
 
 // filter_possible_moves.c 
-void fill_threatmap(Game* g);
+void fill_black_threatmap(Game* g);
+void fill_white_threatmap(Game* g);
+void print_black_threatmap(Game* g);
+void print_white_threatmap(Game* g);
 int is_black_king_threatened(Game* g);
 int is_white_king_threatened(Game* g);
 
@@ -133,5 +141,17 @@ typedef struct
 } Piece_and_moves;
 
 
-int enemy_player_can_move(Game* g);
-int ally_player_can_move(Game* g);
+int white_can_move(Game* g);
+int black_can_move(Game* g);
+int player_can_move(Game* g);
+/**
+ * \struct Position
+ * \brief Representation of a chess move
+ */
+typedef struct
+{
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+} Ai_move;

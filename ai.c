@@ -1,11 +1,13 @@
+#include <time.h> 
 #include "chess.h"
-
-long nb_of_evaluations = 0;
 
 // evaluation is relative to blacks perspective
 int evaluate_board(Game* g)
 {
-    nb_of_evaluations++;
+    if(!(white_can_move(g)) && is_white_king_threatened(g))
+        return 10000;
+    else if(!(black_can_move(g)) && is_black_king_threatened(g))
+        return -10000;
     int evaluation = 0;
     for (int i = 0; i < 8; i++)
     {
@@ -18,16 +20,14 @@ int evaluate_board(Game* g)
                 break;
             case B_PAWN:
                 evaluation += 100;
-                if(j != 1)
-                    evaluation += 50;
+                evaluation += (j != 1)? 5: 0;
                 break;
             case W_ROOK:
                 evaluation -= 500;
                 break;
             case B_ROOK:
                 evaluation += 500;
-                if(j != 0)
-                    evaluation += 50;
+                evaluation += (j != 0)? 5: 0;
                 break;
             case W_BISHOP:
             case W_KNIGHT:
@@ -36,16 +36,14 @@ int evaluate_board(Game* g)
             case B_BISHOP:
             case B_KNIGHT:
                 evaluation += 300;
-                if(j != 0)
-                    evaluation += 50;
+                evaluation += (j != 0)? 5: 0;
                 break;
             case W_QUEEN:
                 evaluation -= 1000;
                 break;
             case B_QUEEN:
                 evaluation += 1000;
-                if(j != 0)
-                    evaluation += 50;
+                evaluation += (j != 0)? 5: 0;
                 break;
             default:
                 break;
@@ -55,58 +53,54 @@ int evaluate_board(Game* g)
     return evaluation;
 }
 
-int minimax(Game* g, int depth, int* move)
+int minimax(Game* g, int depth, Ai_move* ai_m)
 {
-    printf("enemy : %d, ally : %d, depth : %d\n", ally_player_can_move(g), enemy_player_can_move(g), depth);
     if ((depth == 0) || !(player_can_move(g)))
     {
         return evaluate_board(g);
     }
 
-    // compute possible moves
     Piece_and_moves pm;
     pm.ml = init_move_list();
 
     if (g->bool_is_black)
     {
         int max_value = -100000;
-        for (int i = 0; i < g->ally_pieces_count; i++)
+        for (int i = 0; i < g->black_pieces_count; i++)
         {
-            pm.pos.x = g->ally_pieces[i].y;
-            pm.pos.y = g->ally_pieces[i].x;
+            pm.pos.x = g->black_pieces[i].x;
+            pm.pos.y = g->black_pieces[i].y;
             if(pm.pos.x == -1)
                 continue;
             pm.p = get_piece(g, pm.pos.x, pm.pos.y);
-            //printf("minimax debug : pm.pos.x = %d, pm.pos.y = %d, piece is %c\n", pm.pos.x, pm.pos.y, PRINT_STR[pm.p]);
             fill_move_list(g, pm.pos.x, pm.pos.y, pm.ml);
-            //printf("piece & move list length, p = %c, len = %d\n", PRINT_STR[pm.p], pm.ml->nb);
 
             for(int j = 0; j < pm.ml->nb; j += 2)
             {
-                int new_y = pm.ml->arr[j+1];
                 int new_x = pm.ml->arr[j];
-                Piece tmp_captured = g->board[new_y][new_x];
-                g->board[new_y][new_x] = pm.p;
-                g->board[pm.pos.y][pm.pos.x] = EMPTY;
+                int new_y = pm.ml->arr[j+1];
+                Piece tmp_captured = get_piece(g, new_x, new_y);
+                set_piece(g, new_x, new_y, pm.p);
+                set_piece(g, pm.pos.x, pm.pos.y, EMPTY);
 
                 // temporary change of the piece list
-                g->ally_pieces[i].x = new_y;
-                g->ally_pieces[i].y = new_x;
+                g->black_pieces[i].x = new_x;
+                g->black_pieces[i].y = new_y;
 
                 // temporary removal of the captured piece in the pieces list
                 int tmp_x = -1, tmp_y = -1, iter = -1;
-                if (is_white(tmp_captured)) // change to is_black in the other case
+                if (is_white(tmp_captured))
                 {
                     iter = 0;
-                    while(iter < g->enemy_pieces_count) // change to ally_piece_count in other case
+                    while(iter < g->white_pieces_count)
                     {
-                        if((g->enemy_pieces[iter].y == new_x) && (g->enemy_pieces[iter].x == new_y))
+                        if((g->white_pieces[iter].x == new_x) && (g->white_pieces[iter].y == new_y))
                         {
-                            tmp_x = g->enemy_pieces[iter].x;
-                            tmp_y = g->enemy_pieces[iter].y;
+                            tmp_x = g->white_pieces[iter].x;
+                            tmp_y = g->white_pieces[iter].y;
 
-                            g->enemy_pieces[iter].x = -1;
-                            g->enemy_pieces[iter].y = -1;
+                            g->white_pieces[iter].x = -1;
+                            g->white_pieces[iter].y = -1;
 
                             break;
                         }
@@ -130,13 +124,13 @@ int minimax(Game* g, int depth, int* move)
                     switch (new_x - pm.pos.x)
                     {
                     case 2:
-                        g->board[0][5] = g->board[0][7];
-                        g->board[0][7] = EMPTY;
+                        set_piece(g, 5, 0, B_ROOK);
+                        set_piece(g, 7, 0, EMPTY);
                         has_castled = B_KINGSIDE_CASTLE;
                         break;
                     case -2:
-                        g->board[0][3] = g->board[0][0];
-                        g->board[0][0] = EMPTY;
+                        set_piece(g, 3, 0, B_ROOK);
+                        set_piece(g, 0, 0, EMPTY);
                         has_castled = B_QUEENSIDE_CASTLE;
                         break;
                     default:
@@ -154,7 +148,23 @@ int minimax(Game* g, int depth, int* move)
                     if((new_x == g->en_pass.x) && (new_y == g->en_pass.y))
                     {
                         has_captured_en_pass = 1;
-                        g->board[new_y - 1][new_x] = EMPTY;
+                        set_piece(g, new_x, new_y - 1, EMPTY);
+                        // temporary removal of the captured piece in the pieces list
+                        iter = 0;
+                        while(iter < g->white_pieces_count)
+                        {
+                            if((g->white_pieces[iter].x == new_x) && (g->white_pieces[iter].y == (new_y - 1)))
+                            {
+                                tmp_x = g->white_pieces[iter].x;
+                                tmp_y = g->white_pieces[iter].y;
+
+                                g->white_pieces[iter].x = -1;
+                                g->white_pieces[iter].y = -1;
+
+                                break;
+                            }
+                            iter++;
+                        }
                     }
 
                     if((new_y - pm.pos.y) == 2)
@@ -168,11 +178,11 @@ int minimax(Game* g, int depth, int* move)
                         g->en_pass.y = -1;
                     }
 
-                    if(new_y == 0)
+                    if(new_y == 7)
                     {
                         // promotion, I (incorrectly) asssume promotion will only end up in a queen
                         // sorry knight-promotion-enjoyers :/
-                        g->board[new_y][new_x] = B_QUEEN;
+                        set_piece(g, new_x, new_y, B_QUEEN);
                     }
                 }
                 else
@@ -183,34 +193,36 @@ int minimax(Game* g, int depth, int* move)
 
                 g->bool_is_black = 0;
 
-                int candidate = minimax(g, depth - 1, move);
+                int candidate = minimax(g, depth - 1, ai_m);
                 if(candidate > max_value)
                 {
                     max_value = candidate;
-                    move[0] = pm.pos.x;
-                    move[1] = pm.pos.y;
-                    move[2] = new_x;
-                    move[3] = new_y;
-                    printf("%d, %d, %d, %d\n", move[0], move[1], move[2], move[3]);
+                    if(depth == ARBITRARY_DEPTH)
+                    {
+                        ai_m->x1 = pm.pos.x;
+                        ai_m->y1 = pm.pos.y;
+                        ai_m->x2 = new_x;
+                        ai_m->y2 = new_y;
+                    }
                 }
 
                 g->bool_is_black = 1;
 
                 // return to original pos
-                g->board[new_y][new_x] = tmp_captured;
-                g->board[pm.pos.y][pm.pos.x] = pm.p;
+                set_piece(g, new_x, new_y, tmp_captured);
+                set_piece(g, pm.pos.x, pm.pos.y, pm.p);
 
                 // former castles state
                 g->castles = tmp_castles;
                 switch (has_castled)
                 {
                 case B_KINGSIDE_CASTLE:
-                    g->board[0][7] = g->board[0][5];
-                    g->board[0][5] = EMPTY;
+                    set_piece(g, 7, 0, B_ROOK);
+                    set_piece(g, 5, 0, EMPTY);
                     break;
                 case B_QUEENSIDE_CASTLE:
-                    g->board[0][0] = g->board[0][3];
-                    g->board[0][3] = EMPTY;
+                    set_piece(g, 0, 0, B_ROOK);
+                    set_piece(g, 3, 0, EMPTY);
                     break;
                 default:
                     break;
@@ -221,18 +233,18 @@ int minimax(Game* g, int depth, int* move)
                 g->en_pass.y = tmp_en_pass.y;
 
                 if(has_captured_en_pass)
-                    g->board[new_y - 1][new_x] = W_PAWN;
+                    set_piece(g, new_x, new_y - 1, W_PAWN);
 
                 // if piece was captured, restore piece list
                 if(iter != -1)
                 {
-                    g->enemy_pieces[iter].x = tmp_x;
-                    g->enemy_pieces[iter].y = tmp_y;
+                    g->white_pieces[iter].x = tmp_x;
+                    g->white_pieces[iter].y = tmp_y;
                 }
 
                 // former piece list
-                g->ally_pieces[i].x = pm.pos.y;
-                g->ally_pieces[i].y = pm.pos.x;
+                g->black_pieces[i].x = pm.pos.x;
+                g->black_pieces[i].y = pm.pos.y;
             }
             // empty move list
             pm.ml->nb = 0;
@@ -244,43 +256,41 @@ int minimax(Game* g, int depth, int* move)
     {
         int min_value = 100000;
 
-        for (int i = 0; i < g->enemy_pieces_count; i++)
+        for (int i = 0; i < g->white_pieces_count; i++)
         {
-            pm.pos.x = g->enemy_pieces[i].y;
-            pm.pos.y = g->enemy_pieces[i].x;
-            if(pm.pos.y == -1)
+            pm.pos.x = g->white_pieces[i].x;
+            pm.pos.y = g->white_pieces[i].y;
+            if(pm.pos.x == -1)
                 continue;
             pm.p = get_piece(g, pm.pos.x, pm.pos.y);
-            //printf("minimax debug : pm.pos.x = %d, pm.pos.y = %d, piece is %c\n", pm.pos.x, pm.pos.y, PRINT_STR[pm.p]);
             fill_move_list(g, pm.pos.x, pm.pos.y, pm.ml);
-            //printf("piece & move list length, p = %c, len = %d\n", PRINT_STR[pm.p], pm.ml->nb);
 
             for(int j = 0; j < pm.ml->nb; j += 2)
             {
-                int new_y = pm.ml->arr[j+1];
                 int new_x = pm.ml->arr[j];
-                Piece tmp_captured = g->board[new_y][new_x];
-                g->board[new_y][new_x] = pm.p;
-                g->board[pm.pos.y][pm.pos.x] = EMPTY;
+                int new_y = pm.ml->arr[j+1];
+                Piece tmp_captured = get_piece(g, new_x, new_y);
+                set_piece(g, new_x, new_y, pm.p);
+                set_piece(g, pm.pos.x, pm.pos.y, EMPTY);
 
                 // temporary change of the piece list
-                g->enemy_pieces[i].x = new_y;
-                g->enemy_pieces[i].y = new_x;
+                g->white_pieces[i].x = new_x;
+                g->white_pieces[i].y = new_y;
 
                 // temporary removal of the captured piece in the pieces list
                 int tmp_x = -1, tmp_y = -1, iter = -1;
-                if (is_black(tmp_captured)) // change to is_black in the other case
+                if (is_black(tmp_captured))
                 {
                     iter = 0;
-                    while(iter < g->ally_pieces_count) // change to ally_piece_count in other case
+                    while(iter < g->black_pieces_count)
                     {
-                        if((g->ally_pieces[iter].y == new_x) && (g->ally_pieces[iter].x == new_y))
+                        if((g->black_pieces[iter].x == new_x) && (g->black_pieces[iter].y == new_y))
                         {
-                            tmp_x = g->ally_pieces[iter].x;
-                            tmp_y = g->ally_pieces[iter].y;
+                            tmp_x = g->black_pieces[iter].x;
+                            tmp_y = g->black_pieces[iter].y;
 
-                            g->ally_pieces[iter].x = -1;
-                            g->ally_pieces[iter].y = -1;
+                            g->black_pieces[iter].x = -1;
+                            g->black_pieces[iter].y = -1;
 
                             break;
                         }
@@ -304,13 +314,13 @@ int minimax(Game* g, int depth, int* move)
                     switch (new_x - pm.pos.x)
                     {
                     case 2:
-                        g->board[7][5] = g->board[7][7];
-                        g->board[7][7] = EMPTY;
+                        set_piece(g, 5, 7, W_ROOK);
+                        set_piece(g, 7, 7, EMPTY);
                         has_castled = W_KINGSIDE_CASTLE;
                         break;
                     case -2:
-                        g->board[7][3] = g->board[7][0];
-                        g->board[7][0] = EMPTY;
+                        set_piece(g, 3, 7, W_ROOK);
+                        set_piece(g, 0, 7, EMPTY);
                         has_castled = W_QUEENSIDE_CASTLE;
                         break;
                     default:
@@ -328,7 +338,22 @@ int minimax(Game* g, int depth, int* move)
                     if((new_x == g->en_pass.x) && (new_y == g->en_pass.y))
                     {
                         has_captured_en_pass = 1;
-                        g->board[new_y + 1][new_x] = EMPTY;
+                        set_piece(g, new_x, new_y + 1, EMPTY);
+                        iter = 0;
+                        while(iter < g->black_pieces_count)
+                        {
+                            if((g->black_pieces[iter].x == new_x) && (g->black_pieces[iter].y == (new_y + 1)))
+                            {
+                                tmp_x = g->black_pieces[iter].x;
+                                tmp_y = g->black_pieces[iter].y;
+
+                                g->black_pieces[iter].x = -1;
+                                g->black_pieces[iter].y = -1;
+
+                                break;
+                            }
+                            iter++;
+                        }
                     }
 
                     if((new_y - pm.pos.y) == -2)
@@ -346,7 +371,7 @@ int minimax(Game* g, int depth, int* move)
                     {
                         // promotion, I (incorrectly) asssume promotion will only end up in a queen
                         // sorry knight-promotion-enjoyers :/
-                        g->board[new_y][new_x] = W_QUEEN;
+                        set_piece(g, new_x, new_y, W_QUEEN);
                     }
                 }
                 else
@@ -357,26 +382,26 @@ int minimax(Game* g, int depth, int* move)
 
                 g->bool_is_black = 1;
 
-                int candidate = minimax(g, depth - 1, move);
+                int candidate = minimax(g, depth - 1, ai_m);
                 min_value = (candidate < min_value)? candidate: min_value;
 
                 g->bool_is_black = 0;
 
                 // return to original pos
-                g->board[new_y][new_x] = tmp_captured;
-                g->board[pm.pos.y][pm.pos.x] = pm.p;
+                set_piece(g, new_x, new_y, tmp_captured);
+                set_piece(g, pm.pos.x, pm.pos.y, pm.p);
 
                 // former castles state
                 g->castles = tmp_castles;
                 switch (has_castled)
                 {
                 case W_KINGSIDE_CASTLE:
-                    g->board[7][7] = g->board[7][5];
-                    g->board[7][5] = EMPTY;
+                    set_piece(g, 7, 7, W_ROOK);
+                    set_piece(g, 5, 7, EMPTY);
                     break;
                 case W_QUEENSIDE_CASTLE:
-                    g->board[7][0] = g->board[7][3];
-                    g->board[7][3] = EMPTY;
+                    set_piece(g, 0, 7, W_ROOK);
+                    set_piece(g, 3, 7, EMPTY);
                     break;
                 default:
                     break;
@@ -387,18 +412,18 @@ int minimax(Game* g, int depth, int* move)
                 g->en_pass.y = tmp_en_pass.y;
 
                 if(has_captured_en_pass)
-                    g->board[new_y - 1][new_x] = B_PAWN;
+                    set_piece(g, new_x, new_y + 1, B_PAWN);
 
                 // if piece was captured, restore piece list
                 if(iter != -1)
                 {
-                    g->ally_pieces[iter].x = tmp_x;
-                    g->ally_pieces[iter].y = tmp_y;
+                    g->black_pieces[iter].x = tmp_x;
+                    g->black_pieces[iter].y = tmp_y;
                 }
 
                 // former piece list
-                g->enemy_pieces[i].x = pm.pos.y;
-                g->enemy_pieces[i].y = pm.pos.x;
+                g->white_pieces[i].x = pm.pos.x;
+                g->white_pieces[i].y = pm.pos.y;
 
             }
             // empty move list
@@ -409,51 +434,20 @@ int minimax(Game* g, int depth, int* move)
     }
 }
 
-typedef struct 
-{
-    int* arr;
-}Ai_move;
 
-Ai_move* ai_move(char* fen, int depth)
+Ai_move* ai_move(char* fen_string)
 {
     Game g;
-    parse_fen_string(&g, fen);
-    print_game(&g);
+	parse_fen_string(&g, fen_string);
 
-    Ai_move* am = malloc(sizeof(Ai_move));
-    am->arr = malloc(4 * sizeof(int));
+    Ai_move* res = malloc(sizeof(Ai_move));
 
-    minimax(&g, depth, am->arr);
-    printf("%d %d %d %d\n", am->arr[0], am->arr[1], am->arr[2], am->arr[3]);
+    minimax(&g, ARBITRARY_DEPTH, res);
 
-    return am;
+    return res;
 }
 
-void ai_move_free(Ai_move* am)
+void free_ai_move(Ai_move* ai_m)
 {
-    free(am->arr);
-    free(am);
+    free(ai_m);
 }
-
-// int main()
-// {
-// 	Game g;
-
-// 	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 0";
-//     //char* fen2 = "rnb1kbnr/pppp1ppp/8/4p3/4q3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
-// 	parse_fen_string(&g, fen);
-// 	print_game(&g);
-	
-//     for (int i = 0; i < 7; i++)
-//     {
-//         printf("minimax = %d\n", minimax(&g, i));
-//         printf("nb_eval = %ld\n", nb_of_evaluations);
-//     }
-    
-    
-//     printf("evaluate = %d\n", evaluate_board(&g));
-    
-
-
-// 	return 0;
-// }

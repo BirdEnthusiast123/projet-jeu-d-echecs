@@ -281,7 +281,7 @@ void fill_capture_list(Game *g, int x, int y, Move_list *ml)
 {
 	if(x == -1)
 		return;
-	switch (g->board[y][x])
+	switch (get_piece(g, x, y))
 	{
     case W_PAWN:
         fill_capture_list_white_pawn(g, x, y, ml);
@@ -314,55 +314,72 @@ void fill_capture_list(Game *g, int x, int y, Move_list *ml)
 	}
 }
 
-void fill_threatmap(Game* g)
+void fill_black_threatmap(Game* g)
 {
     for (int i = 0; i < 8; i++)
-    {
         for (int j = 0; j < 8; j++)
-        {
-            g->threatmap[i][j] = 0;
-        }
-    }
+            g->black_threatmap[i][j] = 0;
 
     Move_list *ml = init_move_list();
 
-	if(g->bool_is_black)
-	{
-		for (int i = 0; i < g->enemy_pieces_count; i++)
-		{
-			fill_capture_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
-			for (int j = 0; j < ml->nb; j += 2)
-			{
-				g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
-			}
-			ml->nb = 0;
-		}
-	}
-	else
-	{
-		for (int i = 0; i < g->ally_pieces_count; i++)
-		{
-			fill_capture_list(g, g->ally_pieces[i].y, g->ally_pieces[i].x, ml);
-			for (int j = 0; j < ml->nb; j += 2)
-			{
-				g->threatmap[ml->arr[j+1]][ml->arr[j]] += 1;
-			}
-			ml->nb = 0;
-		}
-	}
-
-		
+    // foreach white piece, compute their possible moves (unrestricted by pins and checks)
+    for (int i = 0; i < g->white_pieces_count; i++)
+    {
+        fill_capture_list(g, g->white_pieces[i].x, g->white_pieces[i].y, ml);
+        for (int j = 0; j < ml->nb; j += 2)
+        {
+            // add each of these moves as an increment on the threatmap
+            g->black_threatmap[ml->arr[j]][ml->arr[j+1]] += 1;
+        }
+        ml->nb = 0;
+    }
 
 	free_move_list(ml);
 }
 
-void print_threatmap(Game* g)
+void fill_white_threatmap(Game* g)
+{
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            g->white_threatmap[i][j] = 0;
+
+    Move_list *ml = init_move_list();
+
+    // foreach white piece, compute their possible moves (unrestricted by pins and checks)
+    for (int i = 0; i < g->black_pieces_count; i++)
+    {
+        fill_capture_list(g, g->black_pieces[i].x, g->black_pieces[i].y, ml);
+        for (int j = 0; j < ml->nb; j += 2)
+        {
+            // add each of these moves as an increment on the threatmap
+            g->white_threatmap[ml->arr[j]][ml->arr[j+1]] += 1;
+        }
+        ml->nb = 0;
+    }
+
+	free_move_list(ml);
+}
+
+void print_black_threatmap(Game* g)
 {
     for (size_t i = 0; i < 8; i++)
     {
         for (size_t j = 0; j < 8; j++)
         {
-            printf("%d, ", g->threatmap[i][j]);
+            printf("%d, ", g->black_threatmap[j][i]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_white_threatmap(Game* g)
+{
+    for (size_t i = 0; i < 8; i++)
+    {
+        for (size_t j = 0; j < 8; j++)
+        {
+            printf("%d, ", g->white_threatmap[j][i]);
         }
         printf("\n");
     }
@@ -372,12 +389,31 @@ void print_threatmap(Game* g)
 // returns n = 0 if not threatened, n > 0 if threatened
 int is_black_king_threatened(Game* g)
 {
-    fill_threatmap(g);
-    return g->threatmap[g->black_king_pos.x][g->black_king_pos.y];
+    fill_black_threatmap(g);
+    return g->black_threatmap[g->black_king_pos.x][g->black_king_pos.y];
 }
 
 int is_white_king_threatened(Game* g)
 {
-    fill_threatmap(g);
-    return g->threatmap[g->white_king_pos.x][g->white_king_pos.y];
+    fill_white_threatmap(g);
+    return g->white_threatmap[g->white_king_pos.x][g->white_king_pos.y];
 }
+
+
+// int main()
+// {
+// 	Game g;
+
+// 	char *fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+// 	parse_fen_string(&g, fen);
+// 	print_game(&g);
+
+//     fill_black_threatmap(&g);
+//     fill_white_threatmap(&g);
+//     print_black_threatmap(&g);
+//     print_white_threatmap(&g);
+//     printf("%d, %d\n", is_black_king_threatened(&g), is_white_king_threatened(&g));
+	
+
+// 	return 0;
+// }

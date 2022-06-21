@@ -1,53 +1,10 @@
 /**
  * \file possible_moves.c
  * \brief Source code relating to the computation of the moves
- * a piece can make (does not account for checks and pins)
+ * a piece can make
  */
 
 #include "chess.h"
-
-/** \brief Initializes and allocates the memory necessary
- * \post Free the allocated memory with the \c free_move_list function
- */
-Move_list *init_move_list()
-{
-	Move_list *res = malloc(sizeof(Move_list));
-	res->len = MOVE_LIST_BUFFER_SIZE;
-	res->arr = malloc(MOVE_LIST_BUFFER_SIZE * sizeof(int));
-	res->nb = 0;
-	return res;
-}
-
-/** \brief Frees the memory allocated by a Move_list struct
- */
-void free_move_list(Move_list *ml)
-{
-	free(ml->arr);
-	free(ml);
-}
-
-void print_move_list(Move_list *ml)
-{
-	for (int i = 0; i < ml->nb; i += 2)
-	{
-		printf("x = %d, y = %d\n", ml->arr[i], ml->arr[i + 1]);
-	}
-}
-
-/** \brief Adds the move \c x, \c y to the Move-list struct
- */
-void add_move(Move_list *ml, int x, int y)
-{
-	ml->arr[ml->nb] = x;
-	ml->arr[(ml->nb) + 1] = y;
-	ml->nb += 2;
-
-	if (((ml->nb) % MOVE_LIST_BUFFER_SIZE) == 0)
-	{
-		ml->len += MOVE_LIST_BUFFER_SIZE;
-		ml->arr = realloc(ml->arr, ml->len * sizeof(int));
-	}
-}
 
 void add_move_if_not_threatening_king
 (
@@ -58,49 +15,70 @@ void add_move_if_not_threatening_king
 	Piece p
 )
 {
-	Piece tmp_p = g->board[new_y][new_x];
-	int tmp_x, tmp_y, i = -1;
-
-	g->board[new_y][new_x] = p;
-	g->board[y][x] = EMPTY;
+	Piece tmp_p = get_piece(g, new_x, new_y);
+    set_piece(g, new_x, new_y, p);
+    set_piece(g, x, y, EMPTY);
 
 	// temporary removal of the captured piece in the enemy_pieces list
-	if
-	(
-		(g->bool_is_black && is_white(tmp_p)) ||
-		(!(g->bool_is_black) && is_black(tmp_p))
-	)
+	int tmp_x, tmp_y, i = -1;
+	if(g->bool_is_black && is_white(tmp_p))
 	{
 		i = 0;
-		while(i < g->enemy_pieces_count)
+		while(i < g->white_pieces_count)
 		{
-			if((g->enemy_pieces[i].y == new_x) && (g->enemy_pieces[i].x == new_y))
+			if((g->white_pieces[i].x == new_x) && (g->white_pieces[i].y == new_y))
 			{
-				tmp_x = g->enemy_pieces[i].x;
-				tmp_y = g->enemy_pieces[i].y;
+				tmp_x = g->white_pieces[i].x;
+				tmp_y = g->white_pieces[i].y;
 
-				g->enemy_pieces[i].x = -1;
-				g->enemy_pieces[i].y = -1;
+				g->white_pieces[i].x = -1;
+				g->white_pieces[i].y = -1;
 
 				break;
 			}
 			i++;
 		}
 	}
+    else if (!(g->bool_is_black) && is_black(tmp_p))
+    {
+        i = 0;
+		while(i < g->black_pieces_count)
+		{
+			if((g->black_pieces[i].x == new_x) && (g->black_pieces[i].y == new_y))
+			{
+				tmp_x = g->black_pieces[i].x;
+				tmp_y = g->black_pieces[i].y;
 
-	if(!(g->bool_is_black) && (is_black_king_threatened(g) == 0))
+				g->black_pieces[i].x = -1;
+				g->black_pieces[i].y = -1;
+
+				break;
+			}
+			i++;
+		}
+    }
+
+	if((g->bool_is_black) && (is_black_king_threatened(g) == 0))
 		add_move(ml, new_x, new_y);
-	else if (((g->bool_is_black)) && (is_white_king_threatened(g) == 0))
+	else if ((!(g->bool_is_black)) && (is_white_king_threatened(g) == 0))
 		add_move(ml, new_x, new_y);
 
 	if((i != -1) && (i != 16))
 	{
-		g->enemy_pieces[i].x = tmp_x;
-		g->enemy_pieces[i].y = tmp_y;
+        if(g->bool_is_black)
+        {
+            g->white_pieces[i].x = tmp_x;
+            g->white_pieces[i].y = tmp_y;
+        }
+        else
+        {
+            g->black_pieces[i].x = tmp_x;
+            g->black_pieces[i].y = tmp_y;
+        }
 	}
 	
-	g->board[new_y][new_x] = tmp_p;
-	g->board[y][x] = p;
+    set_piece(g, new_x, new_y, tmp_p);
+    set_piece(g, x, y, p);
 }
 
 // post: check for promotion
@@ -131,16 +109,16 @@ void fill_move_list_black_pawn(Game *g, int x, int y, Move_list *ml)
 	// en passant
 	if (((x + 1) == g->en_pass.x) && ((y + 1) == g->en_pass.y))
 	{
-		g->board[y][x+1] = EMPTY;
+        set_piece(g, x + 1, y, EMPTY);
 		add_move_if_not_threatening_king(g, ml, x, y, x+1, y+1, B_PAWN);
-		g->board[y][x+1] = W_PAWN;
+        set_piece(g, x + 1, y, W_PAWN);
 	}
 
 	if (((x - 1) == g->en_pass.x) && ((y + 1) == g->en_pass.y))
 	{
-		g->board[y][x-1] = EMPTY;
+		set_piece(g, x - 1, y, EMPTY);
 		add_move_if_not_threatening_king(g, ml, x, y, x-1, y+1, B_PAWN);
-		g->board[y][x-1] = W_PAWN;
+		set_piece(g, x - 1, y, W_PAWN);
 	}
 }
 
@@ -408,7 +386,9 @@ void fill_move_list_black_queen(Game *g, int x, int y, Move_list *ml)
 {
 	fill_move_list_black_rook(g, x, y, ml);
 	fill_move_list_black_bishop(g, x, y, ml);
-	g->board[y][x] = B_QUEEN;
+    // function above changes the piece quality to a bishop
+    // reseting piece quality to queen
+    set_piece(g, x, y, B_QUEEN);
 }
 
 void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
@@ -430,8 +410,8 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 				)
 				{
 					int x_mem = g->black_king_pos.x, y_mem = g->black_king_pos.y;
-					g->black_king_pos.x = tmp_y;
-					g->black_king_pos.y = tmp_x;
+					g->black_king_pos.x = tmp_x;
+					g->black_king_pos.y = tmp_y;
 					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, B_KING);
 					g->black_king_pos.x = x_mem;
 					g->black_king_pos.y = y_mem;
@@ -440,17 +420,17 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 		}
 	}
 
-	fill_threatmap(g);
+	fill_black_threatmap(g);
 
 	//kingside castle
 	if
 	(
 		(g->castles & B_KINGSIDE_CASTLE)&&
-		(is_empty(g->board[0][6]))&&
-		(is_empty(g->board[0][5]))&&
-		(g->threatmap[0][6] == 0)&&
-		(g->threatmap[0][5] == 0)&&
-		(g->threatmap[0][4] == 0)
+        (is_empty(get_piece(g, 6, 0)))&&
+        (is_empty(get_piece(g, 5, 0)))&&
+		(g->black_threatmap[6][0] == 0)&&
+		(g->black_threatmap[5][0] == 0)&&
+		(g->black_threatmap[4][0] == 0)
 	)
 	{
 		add_move(ml, 6, 0);
@@ -460,12 +440,12 @@ void fill_move_list_black_king(Game *g, int x, int y, Move_list *ml)
 	if
 	(
 		(g->castles & B_QUEENSIDE_CASTLE)&&
-		(is_empty(g->board[0][1]))&&
-		(is_empty(g->board[0][2]))&&
-		(is_empty(g->board[0][3]))&&
-		(g->threatmap[0][2] == 0)&&
-		(g->threatmap[0][3] == 0)&&
-		(g->threatmap[0][4] == 0)
+        (is_empty(get_piece(g, 1, 0)))&&
+        (is_empty(get_piece(g, 2, 0)))&&
+        (is_empty(get_piece(g, 3, 0)))&&
+		(g->black_threatmap[2][0] == 0)&&
+		(g->black_threatmap[3][0] == 0)&&
+		(g->black_threatmap[4][0] == 0)
 	)
 	{
 		add_move(ml, 2, 0);
@@ -496,16 +476,16 @@ void fill_move_list_white_pawn(Game *g, int x, int y, Move_list *ml)
 	// en passant
 	if (((x + 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
 	{
-		g->board[y][x+1] = EMPTY;
+        set_piece(g, x + 1, y, EMPTY);
 		add_move_if_not_threatening_king(g, ml, x, y, x + 1, y - 1, W_PAWN);
-		g->board[y][x+1] = B_PAWN;
+		set_piece(g, x + 1, y, B_PAWN);
 	}
 
 	if (((x - 1) == g->en_pass.x) && ((y - 1) == g->en_pass.y))
 	{
-		g->board[y][x-1] = EMPTY;
+		set_piece(g, x - 1, y, EMPTY);
 		add_move_if_not_threatening_king(g, ml, x, y, x - 1, y - 1, W_PAWN);
-		g->board[y][x-1] = B_PAWN;
+		set_piece(g, x - 1, y, B_PAWN);
 	}
 }
 
@@ -773,7 +753,9 @@ void fill_move_list_white_queen(Game *g, int x, int y, Move_list *ml)
 {
 	fill_move_list_white_rook(g, x, y, ml);
 	fill_move_list_white_bishop(g, x, y, ml);
-	g->board[y][x] = W_QUEEN;
+    // function above changes the piece quality to a bishop
+    // reseting piece quality to queen
+    set_piece(g, x, y, W_QUEEN);
 }
 
 void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
@@ -793,8 +775,8 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 					((!is_white(get_piece(g, tmp_x, tmp_y)))))
 				{
 					int x_mem = g->white_king_pos.x, y_mem = g->white_king_pos.y;
-					g->white_king_pos.x = tmp_y;
-					g->white_king_pos.y = tmp_x;
+					g->white_king_pos.x = tmp_x;
+					g->white_king_pos.y = tmp_y;
 					add_move_if_not_threatening_king(g, ml, x, y, tmp_x, tmp_y, W_KING);
 					g->white_king_pos.x = x_mem;
 					g->white_king_pos.y = y_mem;
@@ -803,17 +785,17 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 		}
 	}
 
-	fill_threatmap(g);
+	fill_white_threatmap(g);
 
 	//kingside castle
 	if
 	(
 		(g->castles & W_KINGSIDE_CASTLE)&&
-		(is_empty(g->board[7][6]))&&
-		(is_empty(g->board[7][5]))&&
-		(g->threatmap[7][6] == 0)&&
-		(g->threatmap[7][5] == 0)&&
-		(g->threatmap[7][4] == 0)
+        (is_empty(get_piece(g, 6, 7)))&&
+        (is_empty(get_piece(g, 5, 7)))&&
+		(g->white_threatmap[6][7] == 0)&&
+		(g->white_threatmap[5][7] == 0)&&
+		(g->white_threatmap[4][7] == 0)
 	)
 	{
 		add_move(ml, 6, 7);
@@ -823,12 +805,12 @@ void fill_move_list_white_king(Game *g, int x, int y, Move_list *ml)
 	if
 	(
 		(g->castles & W_QUEENSIDE_CASTLE)&&
-		(is_empty(g->board[7][1]))&&
-		(is_empty(g->board[7][2]))&&
-		(is_empty(g->board[7][3]))&&
-		(g->threatmap[7][2] == 0)&&
-		(g->threatmap[7][3] == 0)&&
-		(g->threatmap[7][4] == 0)
+        (is_empty(get_piece(g, 1, 7)))&&
+        (is_empty(get_piece(g, 2, 7)))&&
+        (is_empty(get_piece(g, 3, 7)))&&
+		(g->white_threatmap[2][7] == 0)&&
+		(g->white_threatmap[3][7] == 0)&&
+		(g->white_threatmap[4][7] == 0)
 	)
 	{
 		add_move(ml, 2, 7);
@@ -843,7 +825,7 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 {
 	if(x == -1)
 		return;
-	switch (g->board[y][x])
+	switch (get_piece(g, x, y))
 	{
 	case B_PAWN:
 		fill_move_list_black_pawn(g, x, y, ml);
@@ -889,6 +871,7 @@ void fill_move_list(Game *g, int x, int y, Move_list *ml)
 /** \brief Initializes and fills the array of a Move_list struct
  * with the possible moves achievable by the piece at coordinates \c x, \c y
  * in the game described by the fen string
+ * \post free the allocated memory with free_move_list
  */
 Move_list *possible_moves(char *fen, int x, int y)
 {
@@ -902,13 +885,13 @@ Move_list *possible_moves(char *fen, int x, int y)
 	return res;
 }
 
-int ally_player_can_move(Game* g)
+int black_can_move(Game* g)
 {
-	Move_list *ml = init_move_list();
+    Move_list *ml = init_move_list();
 
-    for (int i = 0; i < g->ally_pieces_count; i++)
+    for (int i = 0; i < g->black_pieces_count; i++)
     {
-        fill_move_list(g, g->ally_pieces[i].y, g->ally_pieces[i].x, ml);
+        fill_move_list(g, g->black_pieces[i].x, g->black_pieces[i].y, ml);
         if(ml->nb != 0) 
 		{
 			free_move_list(ml);
@@ -921,20 +904,20 @@ int ally_player_can_move(Game* g)
 	return 0;
 }
 
-int enemy_player_can_move(Game* g)
+int white_can_move(Game* g)
 {
-	Move_list *ml = init_move_list();
+    Move_list *ml = init_move_list();
 
-	for (int i = 0; i < g->enemy_pieces_count; i++)
-	{
-		fill_move_list(g, g->enemy_pieces[i].y, g->enemy_pieces[i].x, ml);
-		if(ml->nb != 0) 
+    for (int i = 0; i < g->white_pieces_count; i++)
+    {
+        fill_move_list(g, g->white_pieces[i].x, g->white_pieces[i].y, ml);
+        if(ml->nb != 0) 
 		{
 			free_move_list(ml);
 			return 1;
 		}
-		ml->nb = 0;
-	}
+        ml->nb = 0;
+    }
 
 	free_move_list(ml);
 	return 0;
@@ -942,7 +925,5 @@ int enemy_player_can_move(Game* g)
 
 int player_can_move(Game* g)
 {
-	return ally_player_can_move(g) && enemy_player_can_move(g);
+    return (g->bool_is_black)? black_can_move(g): white_can_move(g);
 }
-
-

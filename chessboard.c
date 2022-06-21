@@ -45,88 +45,97 @@ int skip_spaces_string(char *str, int i)
 
 /* struct Game related functions */
 
+void add_to_black_pieces_list(Game* g, int x, int y)
+{
+    g->black_pieces[g->black_pieces_count].x = x;
+    g->black_pieces[g->black_pieces_count].y = y;
+    g->black_pieces_count++;
+}
+
+void add_to_white_pieces_list(Game* g, int x, int y)
+{
+    g->white_pieces[g->white_pieces_count].x = x;
+    g->white_pieces[g->white_pieces_count].y = y;
+    g->white_pieces_count++;
+}
+
 /**
  * \brief Fills the Game's struct board at coordinates \c x, \c y
  * in regards to the FEN chess notation associated with the
  * parsed character
  */
-void parse_fen_char_pieces(Game *g, char c, int x, int *y)
+void parse_fen_char_pieces(Game *g, char c, int* x, int y)
 {
 	if (is_digit(c))
 	{
-		int tmp = *y + parse_int_char(c);
-		for (int i = *y; i < tmp; i++)
+		int tmp = *x + parse_int_char(c);
+		for (int i = *x; i < tmp; i++)
 		{
-			g->board[x][i] = EMPTY;
+			g->board[i][y] = EMPTY;
 		}
-		*y += parse_int_char(c);
+		*x += parse_int_char(c);
 	}
 	else
 	{
 		switch (c)
 		{
 			case 'p':
-				g->board[x][*y] = B_PAWN;
+				g->board[*x][y] = B_PAWN;
+                add_to_black_pieces_list(g, *x, y);
 				break;
 			case 'r':
-				g->board[x][*y] = B_ROOK;
+				g->board[*x][y] = B_ROOK;
+                add_to_black_pieces_list(g, *x, y);
 				break;
 			case 'n':
-				g->board[x][*y] = B_KNIGHT;
+				g->board[*x][y] = B_KNIGHT;
+                add_to_black_pieces_list(g, *x, y);
 				break;
 			case 'b':
-				g->board[x][*y] = B_BISHOP;
+				g->board[*x][y] = B_BISHOP;
+                add_to_black_pieces_list(g, *x, y);
 				break;
 			case 'q':
-				g->board[x][*y] = B_QUEEN;
+				g->board[*x][y] = B_QUEEN;
+                add_to_black_pieces_list(g, *x, y);
 				break;
 			case 'k':
-				g->board[x][*y] = B_KING;
-				g->black_king_pos.x = x;
-				g->black_king_pos.y = *y;
+				g->board[*x][y] = B_KING;
+                add_to_black_pieces_list(g, *x, y);
+				g->black_king_pos.x = *x;
+				g->black_king_pos.y = y;
 				break;
 			case 'P':
-				g->board[x][*y] = W_PAWN;
+				g->board[*x][y] = W_PAWN;
+                add_to_white_pieces_list(g, *x, y);
 				break;
 			case 'R':
-				g->board[x][*y] = W_ROOK;
+				g->board[*x][y] = W_ROOK;
+                add_to_white_pieces_list(g, *x, y);
 				break;
 			case 'N':
-				g->board[x][*y] = W_KNIGHT;
+				g->board[*x][y] = W_KNIGHT;
+                add_to_white_pieces_list(g, *x, y);
 				break;
 			case 'B':
-				g->board[x][*y] = W_BISHOP;
+				g->board[*x][y] = W_BISHOP;
+                add_to_white_pieces_list(g, *x, y);
 				break;
 			case 'Q':
-				g->board[x][*y] = W_QUEEN;
+				g->board[*x][y] = W_QUEEN;
+                add_to_white_pieces_list(g, *x, y);
 				break;
 			case 'K':
-				g->board[x][*y] = W_KING;
-				g->white_king_pos.x = x;
-				g->white_king_pos.y = *y;
+				g->board[*x][y] = W_KING;
+                add_to_white_pieces_list(g, *x, y);
+				g->white_king_pos.x = *x;
+				g->white_king_pos.y = y;
 				break;
 			default:
 				break;
 		}
 
-		if 
-		(
-			(g->bool_is_black && is_white(g->board[x][*y])) ||
-			(!(g->bool_is_black) && is_black(g->board[x][*y]))
-		)
-		{
-			g->enemy_pieces[g->enemy_pieces_count].x = x;
-			g->enemy_pieces[g->enemy_pieces_count].y = *y;
-			g->enemy_pieces_count++;
-		}
-		else if(!(is_empty(g->board[x][*y])))
-		{
-			g->ally_pieces[g->ally_pieces_count].x = x;
-			g->ally_pieces[g->ally_pieces_count].y = *y;
-			g->ally_pieces_count++;
-		}
-
-		*y += 1;
+		*x += 1;
 	}
 }
 
@@ -138,18 +147,18 @@ void parse_fen_char_pieces(Game *g, char c, int x, int *y)
  */
 void parse_fen_string_pieces(Game *g, char *fen_string)
 {
-	int i = 0, x = 0;
+	int i = 0, y = 0;
 	while (fen_string[i] != ' ')
 	{
-		int y = 0;
+		int x = 0;
 		while ((fen_string[i] != '/') && (fen_string[i] != ' '))
 		{
-			parse_fen_char_pieces(g, fen_string[i], x, &y);
+			parse_fen_char_pieces(g, fen_string[i], &x, y);
 			i++;
 		}
 		if (fen_string[i] == ' ')
 			return;
-		x++;
+		y++;
 		i++;
 	}
 }
@@ -163,8 +172,8 @@ void parse_fen_string(Game *g, char *fen_string)
 	int i = 0;
 
 	// players pieces
-	g->enemy_pieces_count = 0;
-	g->ally_pieces_count = 0;
+	g->black_pieces_count = 0;
+	g->white_pieces_count = 0;
 
 	// pieces
 	while (fen_string[i] != ' ')
@@ -235,15 +244,15 @@ void parse_fen_string(Game *g, char *fen_string)
 	g->full_moves_count = parse_int_string(&(fen_string[i]));
 
 	// check if game ended in draw or checkmate
-	if(!(player_can_move(g)))
-	{
-		if(g->bool_is_black && is_black_king_threatened(g))
-			printf("Checkmated \n");
-		else if (!(g->bool_is_black) && is_white_king_threatened(g))
-			printf("Checkmated \n");
-		else
-			printf("Draw / Stalemate\n");
-	}
+	// if(!(player_can_move(g)))
+	// {
+	// 	if(g->bool_is_black && is_black_king_threatened(g))
+	// 		printf("Checkmated \n");
+	// 	else if (!(g->bool_is_black) && is_white_king_threatened(g))
+	// 		printf("Checkmated \n");
+	// 	else
+	// 		printf("Draw / Stalemate\n");
+	// }
 }
 
 void print_board(Game *g)
@@ -252,7 +261,7 @@ void print_board(Game *g)
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			printf("%c, \t", PRINT_STR[g->board[i][j]]);
+			printf("%c, \t", PRINT_STR[g->board[j][i]]);
 		}
 		printf("\n");
 	}
@@ -266,16 +275,16 @@ void print_game(Game *g)
 	printf("en passant: x = %d y = %d\n", g->en_pass.x, g->en_pass.y);
 	printf("half moves: %d\n", g->half_moves_count);
 	printf("full moves: %d\n", g->full_moves_count);
-	printf("enemy pieces count : %d\n", g->enemy_pieces_count);
-	for (int i = 0; i < g->enemy_pieces_count; i++)
+	printf("black pieces count : %d\n", g->black_pieces_count);
+	for (int i = 0; i < g->black_pieces_count; i++)
 	{
-		printf("x = %d, y = %d\t", g->enemy_pieces[i].x, g->enemy_pieces[i].y);
+		printf("x = %d, y = %d\t", g->black_pieces[i].x, g->black_pieces[i].y);
 	}
 	printf("\n");
-	printf("ally pieces count : %d\n", g->ally_pieces_count);
-	for (int i = 0; i < g->ally_pieces_count; i++)
+	printf("white pieces count : %d\n", g->white_pieces_count);
+	for (int i = 0; i < g->white_pieces_count; i++)
 	{
-		printf("x = %d, y = %d\t", g->ally_pieces[i].x, g->ally_pieces[i].y);
+		printf("x = %d, y = %d\t", g->white_pieces[i].x, g->white_pieces[i].y);
 	}
 	printf("\n");
 	printf("black king : x = %d, y = %d \n", g->black_king_pos.x, g->black_king_pos.y);
@@ -284,7 +293,12 @@ void print_game(Game *g)
 
 Piece get_piece(Game *g, int x, int y)
 {
-	return g->board[y][x];
+	return g->board[x][y];
+}
+
+void set_piece(Game* g, int x, int y, Piece p)
+{
+	g->board[x][y] = p;
 }
 
 int is_black(Piece p)
@@ -301,5 +315,4 @@ int is_empty(Piece p)
 {
 	return (p == EMPTY);
 }
-
 
